@@ -71,6 +71,20 @@ services:
     networks:
       - camunda-net
 
+  # ── 3. Camunda Frontend (React SPA) ────────────────────────────
+  camunda-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: camunda-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - camunda-workflow
+    networks:
+      - camunda-net
+
 # ── 网络 ─────────────────────────────────────────────────────────
 networks:
   camunda-net:
