@@ -264,8 +264,8 @@ sequenceDiagram
 
 ```xml
 <dependency>
-    <groupId>org.camunda.bpm</groupId>
-    <artifactId>camunda-external-task-client-spring-boot</artifactId>
+    <groupId>org.camunda.bpm.springboot</groupId>
+    <artifactId>camunda-bpm-spring-boot-starter-external-task-client</artifactId>
     <version>7.20.0</version>
 </dependency>
 ```
