@@ -5,6 +5,7 @@ import { Badge } from '../components/Badge';
 import { Play, Trash2, Edit3 } from 'lucide-react';
 
 import { useNavigate } from 'react-router-dom';
+import { authFetch } from '../utils';
 
 interface ProcessDefinition {
   id: string;
@@ -20,7 +21,7 @@ export default function Deployments() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch('/engine-rest/process-definition?latestVersion=true')
+    authFetch('/engine-rest/process-definition?latestVersion=true')
       .then(res => res.json())
       .then(data => {
         setDefinitions(data);
@@ -38,7 +39,7 @@ export default function Deployments() {
     }
 
     try {
-      const res = await fetch(`/engine-rest/deployment/${deploymentId}?cascade=true`, {
+      const res = await authFetch(`/engine-rest/deployment/${deploymentId}?cascade=true`, {
         method: 'DELETE'
       });
       if (res.ok) {
@@ -58,7 +59,7 @@ export default function Deployments() {
   const handleStartInstance = async (key: string) => {
 
     try {
-      const res = await fetch(`/engine-rest/process-definition/key/${key}/start`, {
+      const res = await authFetch(`/engine-rest/process-definition/key/${key}/start`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({})

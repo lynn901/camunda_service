@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
@@ -6,6 +6,7 @@ import { Input } from '../components/Input';
 import { Badge } from '../components/Badge';
 import { UploadCloud } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { authFetch } from '../utils';
 
 
 export default function Deploy() {
@@ -32,7 +33,7 @@ export default function Deploy() {
     formData.append('data', file, file.name);
 
     try {
-      const res = await fetch('/engine-rest/deployment/create', {
+      const res = await authFetch('/engine-rest/deployment/create', {
         method: 'POST',
         body: formData,
       });
