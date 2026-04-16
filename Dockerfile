@@ -1,4 +1,16 @@
-# 只保留运行镜像阶段，依赖外部构建环境在 target 目录下生成 jar
+# ====== Build Stage ======
+FROM maven:3.9.5-eclipse-temurin-17 AS build-stage
+WORKDIR /app
+
+# Copy pom.xml and download dependencies
+COPY pom.xml .
+RUN mvn dependency:go-offline -B
+
+# Copy source and build JAR
+COPY src ./src
+RUN mvn clean package -DskipTests -B
+
+# ====== Run Stage ======
 FROM eclipse-temurin:17-jre-jammy
 
 # 安装必要工具（curl 用于健康检查脚本）
@@ -13,8 +25,8 @@ RUN groupadd -r appgroup && useradd -m -r -g appgroup appuser
 
 WORKDIR /app
 
-# 从宿主机 target 目录复制 jar 文件（要求在 docker build 前已经执行完 mvn package）
-COPY target/*.jar app.jar
+# 从构建阶段复制生成的 jar 文件
+COPY --from=build-stage /app/target/*.jar app.jar
 
 # 修改文件所有者
 RUN chown appuser:appgroup app.jar

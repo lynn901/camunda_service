@@ -31,8 +31,8 @@ public class CamundaSecurityConfig {
         // 2. /api/workflow/* - 保护本工程自定义的精简版接口
         registration.addUrlPatterns("/engine-rest/*", "/api/workflow/*");
         
-        // 设置初始化参数（可选，通常使用默认引擎 default）
-        // registration.addInitParameter("authentication-provider", "org.camunda.bpm.engine.rest.security.auth.impl.HttpBasicAuthenticationProvider");
+        // 设置初始化参数：指定认证提供者为 Basic Auth
+        registration.addInitParameter("authentication-provider", "org.camunda.bpm.engine.rest.security.auth.impl.HttpBasicAuthenticationProvider");
         
         registration.setOrder(1); // 确保在普通过滤器之前执行
         return registration;
