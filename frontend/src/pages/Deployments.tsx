@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { Badge } from '../components/Badge';
-import { Play } from 'lucide-react';
+import { Play, Trash2, Edit3 } from 'lucide-react';
+
 import { useNavigate } from 'react-router-dom';
 
 interface ProcessDefinition {
@@ -31,7 +32,31 @@ export default function Deployments() {
       });
   }, []);
 
+  const handleDeleteDeployment = async (deploymentId: string) => {
+    if (!confirm('Are you sure you want to delete this deployment? This will also delete all associated process instances and history.')) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`/engine-rest/deployment/${deploymentId}?cascade=true`, {
+        method: 'DELETE'
+      });
+      if (res.ok) {
+        setDefinitions(prev => prev.filter(def => def.deploymentId !== deploymentId));
+      } else {
+        alert('Failed to delete deployment');
+      }
+    } catch (e) {
+      alert('Network error');
+    }
+  };
+
+  const handleUpdate = (name: string | null) => {
+    navigate('/deploy', { state: { defaultName: name } });
+  };
+
   const handleStartInstance = async (key: string) => {
+
     try {
       const res = await fetch(`/engine-rest/process-definition/key/${key}/start`, {
         method: 'POST',
@@ -74,13 +99,19 @@ export default function Deployments() {
                 ID: {def.id}
               </p>
               
-              <div className="flex gap-4">
-                <Button variant="secondary" onClick={() => handleStartInstance(def.key)}>
+              <div className="flex gap-2 flex-wrap">
+                <Button variant="secondary" onClick={() => handleStartInstance(def.key)} style={{ flex: 1 }}>
                   <Play size={16} style={{ marginRight: '8px' }} />
-                  Start Instance
+                  Start
                 </Button>
-                <Button variant="ghost" onClick={() => navigate('/monitor')}>
+                <Button variant="outline" onClick={() => navigate('/monitor')} style={{ flex: 1 }}>
                   Monitor
+                </Button>
+                <Button variant="ghost" onClick={() => handleUpdate(def.name || def.key)} title="Update/Redeploy">
+                  <Edit3 size={16} />
+                </Button>
+                <Button variant="ghost" onClick={() => handleDeleteDeployment(def.deploymentId)} style={{ color: 'var(--accent-red)' }} title="Delete Deployment">
+                  <Trash2 size={16} />
                 </Button>
               </div>
             </Card>

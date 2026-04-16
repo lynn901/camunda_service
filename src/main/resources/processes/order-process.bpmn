@@ -20,7 +20,7 @@
       开始 → [外部任务: 库存校验] → [HTTP回调: 推送订单通知] → [用户任务: 人工审核] → 结束
   -->
 
-  <process id="order-process" name="订单处理流程" isExecutable="true">
+  <process id="order-process" name="订单处理流程" isExecutable="true" camunda:historyTimeToLive="180">
 
     <!-- ── 开始事件 ── -->
     <startEvent id="StartEvent_1" name="收到订单">

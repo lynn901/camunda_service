@@ -197,3 +197,15 @@ a:hover {
 
 .text-secondary { color: var(--text-secondary); }
 .text-tertiary { color: var(--text-tertiary); }
+
+/* BPMN Highlighting */
+.highlight:not(.djs-connection) .djs-visual > :nth-child(1) {
+  fill: rgba(0, 82, 239, 0.15) !important;
+  stroke: var(--brand-hover) !important;
+  stroke-width: 3px !important;
+}
+
+.highlight.djs-connection .djs-visual > :nth-child(1) {
+  stroke: var(--brand-hover) !important;
+  stroke-width: 3px !important;
+}

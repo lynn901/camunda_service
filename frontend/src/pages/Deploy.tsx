@@ -1,17 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { Badge } from '../components/Badge';
 import { UploadCloud } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+
 
 export default function Deploy() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  
   const [file, setFile] = useState<File | null>(null);
-  const [deploymentName, setDeploymentName] = useState('');
+  const [deploymentName, setDeploymentName] = useState(location.state?.defaultName || '');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
-  const navigate = useNavigate();
+
 
   const handleDeploy = async (e: React.FormEvent) => {
     e.preventDefault();

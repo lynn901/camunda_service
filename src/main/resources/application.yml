@@ -39,6 +39,7 @@ camunda:
     # none | activity | audit | full
     # 生产推荐 audit：记录关键历史，避免 DB 膨胀
     history-level: audit
+    enforce-history-time-to-live: false # 禁用 HTTL 强制检查，允许上传未设置 HTTL 的流程文件
 
     # ── 后台 Job 执行器（定时任务、异步节点、重试等）──
     job-execution:

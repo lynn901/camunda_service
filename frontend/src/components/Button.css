@@ -88,3 +88,28 @@
   background-color: var(--surface-raised);
   color: var(--text-primary);
 }
+
+/* Button Sizes */
+.btn-sm {
+  padding: 6px 12px !important;
+  font-size: 13px !important;
+}
+
+.btn-md {
+  padding: 8px 16px !important;
+  font-size: 15px !important;
+}
+
+.btn-lg {
+  padding: 12px 24px !important;
+  font-size: 18px !important;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
