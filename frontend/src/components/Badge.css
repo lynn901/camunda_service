@@ -1,0 +1,38 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+}
+
+.badge-subtle {
+  background-color: var(--surface-inverted);
+  color: var(--text-inverted);
+}
+
+.badge-filled {
+  background-color: var(--bg-canvas);
+  color: var(--text-primary);
+  border: 1px solid var(--border-medium);
+}
+
+.badge-glass {
+  background-color: rgba(0, 82, 239, 0.1);
+  color: var(--brand-hover);
+  border: 1px solid rgba(0, 82, 239, 0.3);
+}
+
+.badge-success {
+  background-color: rgba(25, 214, 0, 0.1);
+  color: var(--accent-green);
+  border: 1px solid rgba(25, 214, 0, 0.3);
+}
+
+.badge-error {
+  background-color: rgba(221, 0, 0, 0.1);
+  color: var(--accent-red);
+  border: 1px solid rgba(221, 0, 0, 0.3);
+}

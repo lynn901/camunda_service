@@ -1,0 +1,199 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import 'bpmn-js/dist/assets/diagram-js.css';
+@import 'bpmn-js/dist/assets/bpmn-font/css/bpmn.css';
+
+:root {
+  /* Default to dark mode strictly adhering to Sanity design */
+  --bg-canvas: #0b0b0b;
+  --surface-raised: #212121;
+  --surface-prominent: #353535;
+  --surface-inverted: #ffffff;
+  
+  --text-primary: #ffffff;
+  --text-secondary: #b9b9b9;
+  --text-tertiary: #797979;
+  --text-inverted: #0b0b0b;
+  
+  --border-subtle: #212121;
+  --border-medium: #353535;
+  --border-focus: #0052ef;
+  
+  --brand-cta: #f36458;
+  --brand-hover: #0052ef;
+  
+  --accent-green: #19d600;
+  --accent-red: #dd0000;
+  --accent-blue: #0052ef;
+
+  /* Typography */
+  --font-sans: 'Space Grotesk', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: 'IBM Plex Mono', 'Menlo', 'Monaco', 'Courier New', monospace;
+  
+  /* Radii */
+  --radius-xs: 3px;
+  --radius-sm: 5px;
+  --radius-md: 6px;
+  --radius-lg: 12px;
+  --radius-pill: 99999px;
+}
+
+[data-theme='light'] {
+  --bg-canvas: #fafafa;
+  --surface-raised: #ffffff;
+  --surface-prominent: #f0f0f0;
+  --surface-inverted: #0b0b0b;
+  
+  --text-primary: #0b0b0b;
+  --text-secondary: #5a5a5a;
+  --text-tertiary: #8a8a8a;
+  --text-inverted: #ffffff;
+  
+  --border-subtle: #e5e5e5;
+  --border-medium: #cccccc;
+  --border-focus: #0052ef;
+  
+  /* Brand colors generally stay the same for CTA identity */
+  --brand-cta: #f36458;
+  --brand-hover: #0052ef;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-canvas);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Typography Specifics (extreme negative tracking for display) */
+h1 {
+  font-size: 72px; /* Hero Secondary */
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -2.88px;
+  margin-bottom: 24px;
+}
+
+h2 {
+  font-size: 48px; /* Section Heading */
+  font-weight: 400;
+  line-height: 1.08;
+  letter-spacing: -1.68px;
+  margin-bottom: 16px;
+}
+
+h3 {
+  font-size: 38px; /* Heading Large */
+  font-weight: 400;
+  line-height: 1.10;
+  letter-spacing: -1.14px;
+}
+
+h4 {
+  font-size: 32px; /* Heading Medium */
+  font-weight: 500;
+  line-height: 1.24;
+  letter-spacing: -0.32px;
+}
+
+h5 {
+  font-size: 24px; /* Heading Small */
+  font-weight: 500;
+  line-height: 1.24;
+  letter-spacing: -0.24px;
+}
+
+p, span, div {
+  font-family: var(--font-sans);
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+
+.mono-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: normal;
+  color: var(--text-tertiary);
+}
+
+/* Scrollbar styling for dark mode command center feel */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-canvas);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--surface-prominent);
+  border-radius: var(--radius-pill);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary);
+}
+
+/* Layout Utilities */
+.container {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 32px;
+  width: 100%;
+}
+
+.section {
+  padding: 64px 0;
+}
+
+@media (min-width: 768px) {
+  .section {
+    padding: 120px 0;
+  }
+}
+
+a {
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+a:hover {
+  color: var(--brand-hover);
+}
+
+/* BPMN Viewer custom styles to fit dark mode */
+.bjs-container {
+  background-color: var(--bg-canvas) !important;
+}
+
+/* Base utilities */
+.flex { display: flex; }
+.flex-col { display: flex; flex-direction: column; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.justify-center { justify-content: center; }
+.gap-2 { gap: 8px; }
+.gap-4 { gap: 16px; }
+.gap-6 { gap: 24px; }
+.gap-8 { gap: 32px; }
+
+.mt-2 { margin-top: 8px; }
+.mt-4 { margin-top: 16px; }
+.mt-8 { margin-top: 32px; }
+.mb-2 { margin-bottom: 8px; }
+.mb-4 { margin-bottom: 16px; }
+.mb-8 { margin-bottom: 32px; }
+
+.text-secondary { color: var(--text-secondary); }
+.text-tertiary { color: var(--text-tertiary); }
