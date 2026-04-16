@@ -87,6 +87,17 @@ curl http://localhost:8080/actuator/health
 
 ---
 
+## 安全与认证 (Security & Authentication)
+
+引擎已启用 **Basic Auth** 认证，所有对 `/api/workflow/**` 和 `/engine-rest/**` 的请求均需验证。
+
+*   **认证方式**：HTTP Basic Auth
+*   **默认账号**：`admin`
+*   **默认密码**：`admin` (建议在 `.env` 或 `application.yml` 中修改)
+*   **权限来源**：Camunda 内部 Identity Service (ACT_ID_USER 表)
+
+---
+
 ## REST API 快速参考
 
 > 基础路径：`http://localhost:8080/api/workflow`
@@ -94,7 +105,7 @@ curl http://localhost:8080/actuator/health
 ### 发起流程
 
 ```bash
-curl -X POST "http://localhost:8080/api/workflow/start/order-process?businessKey=ORD-001" \
+curl -u admin:admin -X POST "http://localhost:8080/api/workflow/start/order-process?businessKey=ORD-001" \
   -H "Content-Type: application/json" \
   -d '{
     "callbackUrl": "http://your-service/api/callback",
@@ -107,10 +118,10 @@ curl -X POST "http://localhost:8080/api/workflow/start/order-process?businessKey
 
 ```bash
 # 先查询当前任务
-curl "http://localhost:8080/api/workflow/task/by-business?processKey=order-process&businessKey=ORD-001"
+curl -u admin:admin "http://localhost:8080/api/workflow/task/by-business?processKey=order-process&businessKey=ORD-001"
 
 # 完成任务（审批通过）
-curl -X POST "http://localhost:8080/api/workflow/task/{taskId}/complete" \
+curl -u admin:admin -X POST "http://localhost:8080/api/workflow/task/{taskId}/complete" \
   -H "Content-Type: application/json" \
   -d '{"approved": true, "comment": "同意"}'
 ```
@@ -118,7 +129,7 @@ curl -X POST "http://localhost:8080/api/workflow/task/{taskId}/complete" \
 ### 发送消息（回调确认）
 
 ```bash
-curl -X POST "http://localhost:8080/api/workflow/instance/{instanceId}/message?messageName=OrderConfirmed" \
+curl -u admin:admin -X POST "http://localhost:8080/api/workflow/instance/{instanceId}/message?messageName=OrderConfirmed" \
   -H "Content-Type: application/json" \
   -d '{"result": "SUCCESS"}'
 ```
@@ -202,13 +213,28 @@ camunda.bpm.client:
   async-response-timeout: 20000                      # 长轮询挂起超时时间（建议默认 20s）
   disable-backoff-strategy: false                    # 启用退避策略（空闲时逐渐增加轮询间隔，减轻引擎压力）
   worker-id: inventory-service-${random.uuid}        # Worker 身份标识，在负载均衡集群中便于追踪是哪个实例执行的
+  # 【认证配置】：必须开启以对接已加锁的引擎
+  basic-auth:
+    username: admin
+    password: admin
   subscriptions:
     inventory-check:                                 # 订阅的 Topic 名称
       variable-names: [orderId, count]               # 【最佳实践】：仅提取需要的变量，避免拉取大数据集导致网络瓶颈
       lock-duration: 30000                           # 锁定时间（毫秒），应略大于你的【最大业务处理耗时】
 ```
 
-#### 第四步：编写业务逻辑 (Worker)
+#### 第四步：非 Spring Boot 环境的编程式接入
+
+如果使用普通 Java 客户端，需手动添加 `interceptor`：
+
+```java
+ExternalTaskClient client = ExternalTaskClient.create()
+    .baseUrl("http://localhost:8080/engine-rest")
+    .addInterceptor(new BasicAuthProvider("admin", "admin")) // 核心认证拦截器
+    .build();
+```
+
+#### 第五步：编写业务逻辑 (Worker)
 
 此段代码运行在业务自身的进程中。在执行期如果耗时可能超过定义的 `lock-duration`，需注意锁定时间的续期：
 
