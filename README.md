@@ -25,31 +25,87 @@
 
 ---
 
+## 系统架构 (System Architecture)
+
+项目采用现代化的前后端分离架构，核心引擎作为 Workflow Hub，通过标准接口管理业务流程。
+
+```mermaid
+graph TD
+    subgraph "用户交互层 (Control Plane)"
+        FE[Admin Console - Vite/React]
+    end
+
+    subgraph "核心引擎层 (Workflow Hub)"
+        BE[Camunda Engine - Spring Boot]
+        REST[Rest API / Engine Rest]
+        JobExecutor[Job Executor]
+    end
+
+    subgraph "数据持久层"
+        DB[(PostgreSQL - 流程/历史/任务)]
+    end
+
+    subgraph "业务执行层 (Workflow Workers)"
+        Worker1[业务服务 A - External Worker]
+        Worker2[业务服务 B - Webhook Consumer]
+    end
+
+    FE -->|HTTP/REST| REST
+    REST --> BE
+    BE <--> DB
+    BE -->|POST Callback| Worker2
+    Worker1 -->|Fetch & Lock| REST
+    JobExecutor --> BE
+```
+
+---
+
 ## 项目结构
 
-```
+```text
 camunda_service/
+├── frontend/                        # 前端控制台 (React + Vite)
+│   ├── src/
+│   │   ├── pages/                   # 业务页面 (监控、任务、部署等)
+│   │   ├── components/              # 响应式 UI 组件
+│   │   ├── context/                 # 全局状态管理 (主题、认证)
+│   │   └── bpmn/                    # BPMN 相关工具封装
+│   ├── Dockerfile                   # 前端容器化配置 (Nginx 托管)
+│   └── vite.config.ts               # 构建配置
 ├── src/main/java/com/example/workflow/
 │   ├── CamundaWorkflowApplication.java   # 入口（@EnableProcessApplication）
-│   ├── config/
-│   │   └── AppConfig.java               # RestTemplate Bean
-│   ├── delegate/
-│   │   └── HttpCallbackDelegate.java    # 通用 HTTP 回调委托（模式一）
-│   ├── service/
-│   │   └── WorkflowService.java         # 引擎操作封装（启动/完成/查询等）
-│   ├── controller/
-│   │   └── WorkflowController.java      # REST API（对业务线开放）
-│   └── worker/
-│       └── OrderProcessWorker.java      # 外部任务 Worker 参考示例（模式二）
+│   ├── config/                      # 安全与应用配置
+│   ├── delegate/                    # HTTP 回调委托实现 (模式一)
+│   ├── service/                     # 引擎操作封装
+│   ├── controller/                  # 业务侧 REST API
+│   └── worker/                      # 外部任务客户端示例 (模式二)
 ├── src/main/resources/
-│   ├── application.yml                  # 应用配置（支持环境变量覆盖）
-│   └── processes/
-│       └── order-process.bpmn           # 演示流程（含两种任务模式 + 网关）
-├── Dockerfile                           # 多阶段构建（构建 + 运行分离）
-├── docker-compose.yml                   # PostgreSQL + 工作流引擎编排
-├── .env.example                         # 环境变量模板
-└── pom.xml                              # Maven 依赖（Camunda 7.20 BOM）
+│   ├── application.yml              # 后端配置
+│   └── processes/                   # BPMN 流程定义文件
+├── docker-compose.yml               # 全栈一键编排 (FE + BE + DB)
+├── Dockerfile                       # 后端多阶段构建
+└── .env.example                     # 环境变量模板
 ```
+
+---
+
+## 前端控制台 (Frontend Console)
+
+我们为管理人员提供了一个基于 **React 19** + **Vite** 构建的高级控制面板，专注于流程的可视化监控与运维管理。
+
+### 核心技术栈
+- **框架**: React 19 + TypeScript
+- **构建工具**: Vite 8
+- **流程可视化**: `bpmn-js` (提供实时活动高亮、属性提取)
+- **UI 设计**: Vanilla CSS 现代设计系统 (支持高级暗色模式)
+- **图标**: Lucide React
+- **部署**: Nginx 容器化托管
+
+### 主要功能
+- **实时监控 (Monitor)**: 查看所有进行中的流程实例，并在 BPMN 图上直观展示当前活跃节点。
+- **部署管理 (Deployment)**: 支持在线上传 `.bpmn` 文件并实时部署至引擎。
+- **任务管理 (Tasklist)**: 管理员可直接审批、指派或完成待办任务。
+- **版本控制**: 查看流程定义的不同版本及其关联的实例分布。
 
 ---
 
@@ -68,11 +124,22 @@ cp .env.example .env
 # 打包应用（跳过测试）
 mvn clean package -DskipTests
 
-# 构建镜像并启动所有服务（PostgreSQL + 工作流引擎）
+# 构建镜像并启动所有服务（PostgreSQL + 后端引擎 + 前端控制台）
 docker-compose up -d --build
 ```
 
-### 3. 验证服务
+### 3. 前端本地开发 (Optional)
+
+如果你需要对控制台进行二次开发：
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+访问地址：`http://localhost:5173`
+
+### 4. 验证服务
 
 ```bash
 # 查看引擎日志
