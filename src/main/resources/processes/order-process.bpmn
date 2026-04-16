@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:activiti="http://activiti.org/bpmn"
+             xmlns:camunda="http://camunda.org/schema/1.0/bpmn"
+             xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+             xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC"
+             xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI"
+             typeLanguage="http://www.w3.org/2001/XMLSchema"
+             expressionLanguage="http://www.w3.org/1999/XPath"
+             targetNamespace="http://example.com/workflow">
+
+  <!--
+    示例流程：订单处理流程（order-process）
+    演示了两种任务调度模式：
+      1. Service Task (httpCallbackDelegate) → 模式一：HTTP 主动回调
+      2. Service Task (External Task)       → 模式二：外部任务主动拉取
+
+    流程步骤：
+      开始 → [外部任务: 库存校验] → [HTTP回调: 推送订单通知] → [用户任务: 人工审核] → 结束
+  -->
+
+  <process id="order-process" name="订单处理流程" isExecutable="true">
+
+    <!-- ── 开始事件 ── -->
+    <startEvent id="StartEvent_1" name="收到订单">
+      <outgoing>Flow_start_to_inventory</outgoing>
+    </startEvent>
+
+    <!-- ── 外部任务：库存校验（模式二：External Task） ── -->
+    <serviceTask id="Task_InventoryCheck"
+                 name="库存校验"
+                 camunda:type="external"
+                 camunda:topic="inventory-check">
+      <!--
+        业务系统（库存服务）订阅 Topic: "inventory-check"
+        拉取任务 → 执行库存扣减逻辑 → 回调 complete() 通知工作流继续
+      -->
+      <extensionElements>
+        <camunda:properties>
+          <camunda:property name="description" value="外部任务：由库存服务通过 External Task Client 订阅并处理"/>
+        </camunda:properties>
+      </extensionElements>
+      <incoming>Flow_start_to_inventory</incoming>
+      <outgoing>Flow_inventory_to_notify</outgoing>
+    </serviceTask>
+
+    <!-- ── 服务任务：推送订单通知（模式一：HTTP 回调） ── -->
+    <serviceTask id="Task_NotifyOrderSystem"
+                 name="推送订单通知"
+                 camunda:delegateExpression="${httpCallbackDelegate}"
+                 camunda:asyncBefore="true">
+      <!--
+        asyncBefore=true：使此节点在独立 Job 线程中执行 HTTP 回调。
+        若回调失败，Camunda 会记录 Incident，不影响主流程事务。
+        流程变量 callbackUrl 在发起时传入，例如：http://notify-service/api/workflow/callback
+      -->
+      <incoming>Flow_inventory_to_notify</incoming>
+      <outgoing>Flow_notify_to_review</outgoing>
+    </serviceTask>
+
+    <!-- ── 用户任务：人工审核 ── -->
+    <userTask id="Task_ManualReview"
+              name="人工审核"
+              camunda:assignee="${reviewer}">
+      <!--
+        受理人从流程变量 ${reviewer} 中获取。
+        也可以使用 camunda:candidateGroups="finance,manager" 指定候选组。
+      -->
+      <documentation>审核员检查订单合规性，填写审批意见后完成任务。</documentation>
+      <incoming>Flow_notify_to_review</incoming>
+      <outgoing>Flow_review_to_gateway</outgoing>
+    </userTask>
+
+    <!-- ── 排他网关：审批结果分流 ── -->
+    <exclusiveGateway id="Gateway_ApprovalResult" name="审批结果">
+      <incoming>Flow_review_to_gateway</incoming>
+      <outgoing>Flow_approved</outgoing>
+      <outgoing>Flow_rejected</outgoing>
+    </exclusiveGateway>
+
+    <!-- ── 外部任务：处理通过的订单（模式二：External Task） ── -->
+    <serviceTask id="Task_ProcessOrder"
+                 name="处理订单"
+                 camunda:type="external"
+                 camunda:topic="process-order">
+      <incoming>Flow_approved</incoming>
+      <outgoing>Flow_process_to_end</outgoing>
+    </serviceTask>
+
+    <!-- ── 服务任务：通知审批拒绝（模式一：HTTP 回调） ── -->
+    <serviceTask id="Task_NotifyRejected"
+                 name="通知拒绝"
+                 camunda:delegateExpression="${httpCallbackDelegate}"
+                 camunda:asyncBefore="true">
+      <incoming>Flow_rejected</incoming>
+      <outgoing>Flow_reject_to_end</outgoing>
+    </serviceTask>
+
+    <!-- ── 结束事件（成功） ── -->
+    <endEvent id="EndEvent_Success" name="订单完成">
+      <incoming>Flow_process_to_end</incoming>
+    </endEvent>
+
+    <!-- ── 结束事件（拒绝） ── -->
+    <endEvent id="EndEvent_Rejected" name="订单已拒绝">
+      <incoming>Flow_reject_to_end</incoming>
+    </endEvent>
+
+    <!-- ── 顺序流 ── -->
+    <sequenceFlow id="Flow_start_to_inventory" sourceRef="StartEvent_1" targetRef="Task_InventoryCheck"/>
+    <sequenceFlow id="Flow_inventory_to_notify" sourceRef="Task_InventoryCheck" targetRef="Task_NotifyOrderSystem"/>
+    <sequenceFlow id="Flow_notify_to_review"   sourceRef="Task_NotifyOrderSystem" targetRef="Task_ManualReview"/>
+    <sequenceFlow id="Flow_review_to_gateway"  sourceRef="Task_ManualReview" targetRef="Gateway_ApprovalResult"/>
+
+    <!-- 审批通过：approved == true -->
+    <sequenceFlow id="Flow_approved" sourceRef="Gateway_ApprovalResult" targetRef="Task_ProcessOrder">
+      <conditionExpression xsi:type="tFormalExpression">${approved == true}</conditionExpression>
+    </sequenceFlow>
+    <!-- 审批拒绝：approved == false -->
+    <sequenceFlow id="Flow_rejected" sourceRef="Gateway_ApprovalResult" targetRef="Task_NotifyRejected">
+      <conditionExpression xsi:type="tFormalExpression">${approved == false}</conditionExpression>
+    </sequenceFlow>
+
+    <sequenceFlow id="Flow_process_to_end" sourceRef="Task_ProcessOrder" targetRef="EndEvent_Success"/>
+    <sequenceFlow id="Flow_reject_to_end"  sourceRef="Task_NotifyRejected" targetRef="EndEvent_Rejected"/>
+
+  </process>
+
+  <!-- ─── BPMN 图形布局（DI）─── -->
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="order-process">
+
+      <bpmndi:BPMNShape id="StartEvent_1_di" bpmnElement="StartEvent_1">
+        <omgdc:Bounds x="170" y="182" width="36" height="36"/>
+        <bpmndi:BPMNLabel><omgdc:Bounds x="156" y="225" width="65" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Task_InventoryCheck_di" bpmnElement="Task_InventoryCheck">
+        <omgdc:Bounds x="260" y="160" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Task_NotifyOrderSystem_di" bpmnElement="Task_NotifyOrderSystem">
+        <omgdc:Bounds x="430" y="160" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Task_ManualReview_di" bpmnElement="Task_ManualReview">
+        <omgdc:Bounds x="600" y="160" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Gateway_ApprovalResult_di" bpmnElement="Gateway_ApprovalResult" isMarkerVisible="true">
+        <omgdc:Bounds x="775" y="175" width="50" height="50"/>
+        <bpmndi:BPMNLabel><omgdc:Bounds x="758" y="232" width="84" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Task_ProcessOrder_di" bpmnElement="Task_ProcessOrder">
+        <omgdc:Bounds x="880" y="160" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Task_NotifyRejected_di" bpmnElement="Task_NotifyRejected">
+        <omgdc:Bounds x="880" y="300" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="EndEvent_Success_di" bpmnElement="EndEvent_Success">
+        <omgdc:Bounds x="1052" y="182" width="36" height="36"/>
+        <bpmndi:BPMNLabel><omgdc:Bounds x="1037" y="225" width="65" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="EndEvent_Rejected_di" bpmnElement="EndEvent_Rejected">
+        <omgdc:Bounds x="1052" y="322" width="36" height="36"/>
+        <bpmndi:BPMNLabel><omgdc:Bounds x="1033" y="365" width="75" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="Flow_start_to_inventory_di" bpmnElement="Flow_start_to_inventory">
+        <omgdi:waypoint x="206" y="200"/><omgdi:waypoint x="260" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_inventory_to_notify_di" bpmnElement="Flow_inventory_to_notify">
+        <omgdi:waypoint x="380" y="200"/><omgdi:waypoint x="430" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_notify_to_review_di" bpmnElement="Flow_notify_to_review">
+        <omgdi:waypoint x="550" y="200"/><omgdi:waypoint x="600" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_review_to_gateway_di" bpmnElement="Flow_review_to_gateway">
+        <omgdi:waypoint x="720" y="200"/><omgdi:waypoint x="775" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_approved_di" bpmnElement="Flow_approved">
+        <omgdi:waypoint x="825" y="200"/><omgdi:waypoint x="880" y="200"/>
+        <bpmndi:BPMNLabel><omgdc:Bounds x="830" y="182" width="45" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_rejected_di" bpmnElement="Flow_rejected">
+        <omgdi:waypoint x="800" y="225"/><omgdi:waypoint x="800" y="340"/><omgdi:waypoint x="880" y="340"/>
+        <bpmndi:BPMNLabel><omgdc:Bounds x="806" y="275" width="45" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_process_to_end_di" bpmnElement="Flow_process_to_end">
+        <omgdi:waypoint x="1000" y="200"/><omgdi:waypoint x="1052" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_reject_to_end_di" bpmnElement="Flow_reject_to_end">
+        <omgdi:waypoint x="1000" y="340"/><omgdi:waypoint x="1052" y="340"/>
+      </bpmndi:BPMNEdge>
+
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+
+</definitions>

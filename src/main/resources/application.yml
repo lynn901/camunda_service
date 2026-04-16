@@ -1,0 +1,73 @@
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/camunda_db}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:yourpassword}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+  # 禁用 Spring JPA 自动建表（由 Camunda 自行管理 schema）
+  jpa:
+    open-in-view: false
+
+server:
+  port: ${SERVER_PORT:8080}
+  servlet:
+    context-path: /
+
+camunda:
+  bpm:
+    # ── 管理员账号（用于 Cockpit / Tasklist 登录）──
+    admin-user:
+      id: ${CAMUNDA_ADMIN_USER:admin}
+      password: ${CAMUNDA_ADMIN_PASSWORD:admin}
+      first-name: Admin
+      last-name: User
+      email: admin@example.com
+
+    # ── 数据库 schema 管理 ──
+    database:
+      # true = 启动时自动创建/升级 Camunda 表结构
+      schema-update: true
+
+    # ── 历史级别 ──
+    # none | activity | audit | full
+    # 生产推荐 audit：记录关键历史，避免 DB 膨胀
+    history-level: audit
+
+    # ── 后台 Job 执行器（定时任务、异步节点、重试等）──
+    job-execution:
+      enabled: true
+      core-pool-size: 3
+      max-pool-size: 10
+      queue-capacity: 200
+      lock-time-in-millis: 300000
+
+    # ── 默认序列化格式（流程变量） ──
+    default-serialization-format: application/json
+
+    # ── REST API 相关配置（由 starter-rest 启用）──
+    # Camunda 原生 REST API 挂载在 /engine-rest/**
+    # 生产环境建议加 Spring Security 保护
+
+# Spring Actuator（健康检查、指标暴露）
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+# 日志配置
+logging:
+  level:
+    root: INFO
+    com.example.workflow: DEBUG
+    org.camunda.bpm: WARN
