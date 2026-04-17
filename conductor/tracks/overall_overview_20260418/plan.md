@@ -17,8 +17,8 @@
 
 ## Phase 3: Frontend UI Components (Widget Grid)
 - [x] Task: Design and implement the flexible Widget Grid container component. a5fdaa2
-- [ ] Task: Create individual Metric Card components (Process Stats, Task Metrics, System Health) displaying the fetched data.
-    - [ ] Add Drill-down Links to relevant cards.
+- [x] Task: Create individual Metric Card components (Process Stats, Task Metrics, System Health) displaying the fetched data. 41c0c5f
+    - [x] Add Drill-down Links to relevant cards. 41c0c5f
 - [ ] Task: Implement Date Filtering controls and Auto-Refresh toggle/interval selector on the Overview page.
 - [ ] Task: Integrate components into the main `Dashboard.tsx` (Overall Overview) page.
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Frontend UI Components (Widget Grid)' (Protocol in workflow.md)
