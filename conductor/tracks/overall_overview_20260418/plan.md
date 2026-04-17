@@ -5,7 +5,7 @@
 - [x] Task: Implement `WorkflowService.getOverallMetrics()` to aggregate data from Camunda Java API (HistoryService, ManagementService) and System Actuator. 8c2e24a
     - [ ] Write unit tests for data aggregation.
     - [ ] Implement aggregation logic.
-- [ ] Task: Add `GET /api/workflow/metrics` endpoint in `WorkflowController`.
+- [x] Task: Add `GET /api/workflow/metrics` endpoint in `WorkflowController`. 3ad1818
     - [ ] Write integration test for the new endpoint.
     - [ ] Implement endpoint.
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Backend API Enhancements' (Protocol in workflow.md)
