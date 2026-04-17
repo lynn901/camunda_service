@@ -38,12 +38,12 @@ export const Models: React.FC = () => {
     <div className="space-y-8 animate-in fade-in">
       <div className="flex justify-between items-end">
         <div>
-          <h1 className="text-3xl font-serif text-anthropic-black mb-2">BPMN Model Repository</h1>
-          <p className="text-olive-gray font-sans text-sm">Manage, deploy and trigger automation workflow definitions.</p>
+          <h1 className="text-3xl font-serif text-anthropic-black mb-2">BPMN 模型库</h1>
+          <p className="text-olive-gray font-sans text-sm">管理、部署与触发自动化工作流定义文件。</p>
         </div>
         <Button variant="terracotta" onClick={() => setIsUploadOpen(true)}>
           <UploadCloud className="mr-2 w-4 h-4" />
-          Deploy New Model
+          部署新模型
         </Button>
       </div>
 
@@ -51,24 +51,24 @@ export const Models: React.FC = () => {
         <table className="w-full text-left">
           <thead>
             <tr className="bg-ivory border-b border-border-cream text-[10px] uppercase tracking-widest text-stone-gray font-bold">
-              <th className="px-6 py-4">Model Name / Key</th>
-              <th className="px-6 py-4">Category</th>
-              <th className="px-6 py-4">Version</th>
-              <th className="px-6 py-4">Resource</th>
-              <th className="px-6 py-4 text-right">Operations</th>
+              <th className="px-6 py-4">模型名称 / 标识 (Key)</th>
+              <th className="px-6 py-4">分类</th>
+              <th className="px-6 py-4">版本</th>
+              <th className="px-6 py-4">资源文件</th>
+              <th className="px-6 py-4 text-right">运维操作</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border-cream">
             {loading ? (
               <tr>
                 <td colSpan={5} className="px-6 py-12 text-center text-stone-gray font-sans italic">
-                  Loading models from engine...
+                  正在从引擎同步模型数据...
                 </td>
               </tr>
             ) : models.length === 0 ? (
               <tr>
                 <td colSpan={5} className="px-6 py-12 text-center text-stone-gray font-sans italic">
-                  No process definitions found in engine.
+                  引擎中暂无流程定义。
                 </td>
               </tr>
             ) : models.map((model) => (
@@ -86,7 +86,7 @@ export const Models: React.FC = () => {
                 </td>
                 <td className="px-6 py-4">
                   <span className="text-[10px] font-sans font-bold px-2 py-0.5 bg-ivory text-olive-gray rounded-highly border border-border-cream uppercase tracking-tighter">
-                    {model.category || 'General'}
+                    {model.category || '默认分类'}
                   </span>
                 </td>
                 <td className="px-6 py-4">
@@ -102,14 +102,14 @@ export const Models: React.FC = () => {
                     <button 
                       onClick={() => handleOpenTrigger(model)}
                       className="p-1.5 text-terracotta hover:bg-terracotta/10 rounded-comfortable transition-colors" 
-                      title="Trigger Instance"
+                      title="启动实例"
                     >
                       <PlayCircle size={18} />
                     </button>
-                    <button className="p-1.5 text-charcoal-warm hover:bg-warm-sand rounded-comfortable transition-colors" title="Edit Model">
+                    <button className="p-1.5 text-charcoal-warm hover:bg-warm-sand rounded-comfortable transition-colors" title="编辑模型">
                       <Edit size={18} />
                     </button>
-                    <button className="p-1.5 text-crimson hover:bg-crimson/10 rounded-comfortable transition-colors" title="Delete Deployment">
+                    <button className="p-1.5 text-crimson hover:bg-crimson/10 rounded-comfortable transition-colors" title="删除部署">
                       <Trash2 size={18} />
                     </button>
                   </div>

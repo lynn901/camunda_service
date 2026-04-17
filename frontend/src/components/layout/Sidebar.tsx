@@ -4,10 +4,10 @@ import { LayoutDashboard, GitBranch, Activity, Server, Zap } from 'lucide-react'
 
 export const Sidebar: React.FC = () => {
   const navItems = [
-    { name: 'Dashboard', path: '/', icon: LayoutDashboard },
-    { name: 'Models', path: '/models', icon: GitBranch },
-    { name: 'Instances', path: '/instances', icon: Activity },
-    { name: 'Workers', path: '/workers', icon: Server },
+    { name: '全局大盘', path: '/', icon: LayoutDashboard },
+    { name: '模型库', path: '/models', icon: GitBranch },
+    { name: '实例干预', path: '/instances', icon: Activity },
+    { name: '外部 Worker', path: '/workers', icon: Server },
   ];
 
   return (
@@ -21,7 +21,7 @@ export const Sidebar: React.FC = () => {
       
       <nav className="flex-1 px-4 mt-6">
         <div className="text-[10px] font-sans font-medium text-stone-gray uppercase tracking-widest mb-4 px-2">
-          Operations Hub
+          运维中心 (Operations Hub)
         </div>
         <ul className="space-y-2">
           {navItems.map((item) => (
@@ -49,8 +49,8 @@ export const Sidebar: React.FC = () => {
             OP
           </div>
           <div>
-            <div className="text-sm font-sans font-medium text-warm-silver">SysAdmin</div>
-            <div className="text-[10px] text-stone-gray">Connected</div>
+            <div className="text-sm font-sans font-medium text-warm-silver">系统管理员</div>
+            <div className="text-[10px] text-stone-gray">已连接</div>
           </div>
         </div>
       </div>

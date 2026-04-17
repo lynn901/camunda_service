@@ -26,7 +26,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose, onSuc
       onSuccess();
       onClose();
     } catch (err) {
-      setError('Failed to deploy model. Please check the file and try again.');
+      setError('部署模型失败，请检查文件格式后重试。');
     } finally {
       setLoading(false);
     }
@@ -38,7 +38,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose, onSuc
         <div className="flex justify-between items-center p-6 border-b border-border-cream bg-white">
           <h3 className="text-xl font-serif text-anthropic-black flex items-center gap-2">
             <UploadCloud className="w-5 h-5 text-terracotta" />
-            Deploy New Model
+            部署新模型 (BPMN)
           </h3>
           <button onClick={onClose} className="text-stone-gray hover:text-anthropic-black">
             <X className="w-5 h-5" />
@@ -67,22 +67,22 @@ export const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose, onSuc
               }}
             />
             <FileCode className={`w-12 h-12 mb-4 ${file ? 'text-terracotta' : 'text-stone-gray'}`} />
-            <p className="text-sm font-sans font-medium text-anthropic-black">
-              {file ? file.name : 'Click or drag BPMN 2.0 XML to this area'}
+            <p className="text-sm font-sans font-medium text-anthropic-black text-center px-4">
+              {file ? file.name : '点击或拖拽 BPMN 2.0 XML 文件至此区域'}
             </p>
-            <p className="text-xs text-stone-gray mt-2">Supports .bpmn, .xml formats</p>
+            <p className="text-xs text-stone-gray mt-2">支持格式: .bpmn, .xml</p>
           </div>
 
           <div className="space-y-2">
             <label className="block text-xs font-sans font-bold text-stone-gray uppercase tracking-widest">
-              Deployment Name
+              部署名称 (Deployment Name)
             </label>
             <input 
               type="text" 
               value={deploymentName}
               onChange={(e) => setDeploymentName(e.target.value)}
               className="w-full bg-white border border-border-warm rounded-generous px-4 py-2 text-sm font-sans focus:outline-none focus:ring-1 focus:ring-terracotta transition-all"
-              placeholder="e.g., Order Process V1"
+              placeholder="例如: 订单处理流程 V1"
             />
           </div>
 
@@ -90,13 +90,13 @@ export const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose, onSuc
         </div>
 
         <div className="p-6 border-t border-border-cream bg-white flex justify-end gap-3">
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button variant="outline" onClick={onClose}>取消</Button>
           <Button 
             variant="terracotta" 
             disabled={!file || !deploymentName || loading}
             onClick={handleUpload}
           >
-            {loading ? 'Deploying...' : 'Confirm & Deploy'}
+            {loading ? '正在部署...' : '确认并部署'}
           </Button>
         </div>
       </div>

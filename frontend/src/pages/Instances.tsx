@@ -133,13 +133,13 @@ export const Instances: React.FC = () => {
   };
 
   const handleTerminate = async () => {
-    if (!selectedInstance || !confirm('Are you sure you want to terminate this instance?')) return;
+    if (!selectedInstance || !confirm('确定要终止该流程实例吗？此操作不可撤销。')) return;
     try {
       await camundaService.terminateProcessInstance(selectedInstance.id);
       setSelectedInstance(null);
       fetchInstances();
     } catch (err) {
-      alert('Failed to terminate');
+      alert('终止失败');
     }
   };
 
@@ -152,7 +152,7 @@ export const Instances: React.FC = () => {
       {/* Left Sidebar: Instance List */}
       <div className="w-96 shrink-0 flex flex-col bg-white rounded-comfortable border border-border-cream shadow-whisper overflow-hidden">
         <div className="p-6 border-b border-border-cream bg-ivory">
-          <h3 className="text-lg font-serif text-anthropic-black mb-4">Instance Intervention</h3>
+          <h3 className="text-lg font-serif text-anthropic-black mb-4">实例干预与排障</h3>
           <div className="relative group">
             <Filter size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-gray" />
             <select 
@@ -160,7 +160,7 @@ export const Instances: React.FC = () => {
               value={filterDefinition}
               onChange={(e) => setFilterDefinition(e.target.value)}
             >
-              <option value="All">All Models ({instances.length})</option>
+              <option value="All">所有流程模型 ({instances.length})</option>
               {definitions.map(def => (
                 <option key={def.key} value={def.key}>{def.name || def.key}</option>
               ))}
@@ -171,11 +171,11 @@ export const Instances: React.FC = () => {
         <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-parchment/30">
           {loading ? (
             <div className="h-full flex items-center justify-center italic text-stone-gray font-sans text-sm">
-              Syncing with engine...
+              正在同步引擎数据...
             </div>
           ) : instances.length === 0 ? (
             <div className="h-full flex items-center justify-center italic text-stone-gray font-sans text-sm text-center px-8">
-              No active or failed instances found for this selection.
+              当前筛选条件下未发现活跃或失败的实例。
             </div>
           ) : instances.map(inst => (
             <Card 
@@ -186,14 +186,14 @@ export const Instances: React.FC = () => {
               <div className="flex justify-between items-start mb-3">
                 <div className="overflow-hidden">
                   <span className="font-mono text-[10px] font-bold text-stone-gray block truncate">{inst.id}</span>
-                  <p className="text-[10px] text-stone-gray mt-1 truncate">Biz: <span className="text-anthropic-black font-medium">{inst.businessKey || 'N/A'}</span></p>
+                  <p className="text-[10px] text-stone-gray mt-1 truncate">流水号: <span className="text-anthropic-black font-medium">{inst.businessKey || '无'}</span></p>
                 </div>
                 <span className={`text-[9px] font-bold px-2 py-0.5 rounded-highly uppercase tracking-tighter border ${
                   inst.state === 'Failed' ? 'bg-crimson/5 text-crimson border-crimson/20' : 
                   inst.state === 'Suspended' ? 'bg-stone-gray/5 text-stone-gray border-stone-gray/20' : 
                   'bg-terracotta/5 text-terracotta border-terracotta/20'
                 }`}>
-                  {inst.state}
+                  {inst.state === 'Failed' ? '执行异常' : inst.state === 'Suspended' ? '已挂起' : '运行中'}
                 </span>
               </div>
               <div className="p-2 bg-ivory rounded border border-border-cream">
@@ -219,23 +219,23 @@ export const Instances: React.FC = () => {
                   </span>
                 </div>
                 <div className="flex gap-4 text-[10px] font-sans text-stone-gray">
-                  <span>Business Key: <span className="text-warm-silver font-mono">{selectedInstance.businessKey || 'N/A'}</span></span>
+                  <span>业务流水号: <span className="text-warm-silver font-mono">{selectedInstance.businessKey || '无'}</span></span>
                   <span className="w-[1px] bg-dark-warm h-3 mt-0.5" />
-                  <span>Status: <span className={selectedInstance.state === 'Failed' ? 'text-crimson' : 'text-terracotta'}>{selectedInstance.state}</span></span>
+                  <span>状态: <span className={selectedInstance.state === 'Failed' ? 'text-crimson' : 'text-terracotta'}>{selectedInstance.state}</span></span>
                 </div>
               </div>
               <div className="flex gap-2">
                 {selectedInstance.suspended ? (
                   <Button size="sm" variant="outline" className="border-dark-warm text-stone-gray hover:text-ivory" onClick={handleActivate}>
-                    <PlayIcon size={14} className="mr-2" /> Activate
+                    <PlayIcon size={14} className="mr-2" /> 激活
                   </Button>
                 ) : (
                   <Button size="sm" variant="outline" className="border-dark-warm text-stone-gray hover:text-ivory" onClick={handleSuspend}>
-                    <PauseCircle size={14} className="mr-2" /> Suspend
+                    <PauseCircle size={14} className="mr-2" /> 挂起
                   </Button>
                 )}
                 <Button size="sm" variant="primary" className="bg-crimson/20 border-crimson/30 text-crimson hover:bg-crimson/30" onClick={handleTerminate}>
-                  <StopCircle size={14} className="mr-2" /> Terminate
+                  <StopCircle size={14} className="mr-2" /> 终止释放
                 </Button>
               </div>
             </div>
@@ -245,11 +245,11 @@ export const Instances: React.FC = () => {
               <div className="flex-1 p-8 overflow-y-auto bg-parchment/30 border-r border-border-cream">
                 <h3 className="text-sm font-serif font-bold text-anthropic-black mb-8 flex items-center gap-2">
                   <Activity size={16} className="text-terracotta" />
-                  Execution Pipeline
+                  执行链路 (Execution Pipeline)
                 </h3>
 
                 {detailLoading ? (
-                  <div className="italic text-stone-gray text-sm font-sans">Loading timeline...</div>
+                  <div className="italic text-stone-gray text-sm font-sans">正在加载链路状态...</div>
                 ) : (
                   <div className="relative border-l border-border-warm ml-4 space-y-8 pb-8">
                     {steps.filter(s => s.activityType !== 'processDefinition').map((step, idx) => (
@@ -282,16 +282,16 @@ export const Instances: React.FC = () => {
                           
                           {step.status === 'Failed' && incidents.find(inc => inc.activityId === step.activityId) && (
                             <div className="mt-4 border-t border-crimson/10 pt-4 space-y-3">
-                              <p className="text-[10px] font-sans font-bold text-crimson uppercase tracking-widest">Exception Stack Trace</p>
+                              <p className="text-[10px] font-sans font-bold text-crimson uppercase tracking-widest">异常堆栈日志 (Exception Stack Trace)</p>
                               <div className="bg-anthropic-black text-coral p-4 rounded-generous text-[11px] font-mono whitespace-pre-wrap overflow-x-auto border border-dark-surface shadow-inner max-h-40 overflow-y-auto leading-relaxed">
                                 {incidents.find(inc => inc.activityId === step.activityId)?.incidentMessage}
                               </div>
                               <div className="flex gap-3">
                                 <Button size="sm" variant="terracotta" className="flex-1">
-                                  <RefreshCw size={14} className="mr-2" /> Retry Node
+                                  <RefreshCw size={14} className="mr-2" /> 原点重试 (Retry)
                                 </Button>
                                 <Button size="sm" variant="outline" className="flex-1">
-                                  <FastForward size={14} className="mr-2" /> Skip Step
+                                  <FastForward size={14} className="mr-2" /> 强制跳过 (Skip)
                                 </Button>
                               </div>
                             </div>
@@ -308,9 +308,9 @@ export const Instances: React.FC = () => {
                 <div className="p-6 border-b border-border-cream bg-white/50">
                   <h3 className="text-xs font-sans font-bold text-stone-gray uppercase tracking-widest flex items-center gap-2">
                     <Settings size={14} />
-                    Context Variables
+                    上下文变量 (Variables)
                   </h3>
-                  <p className="text-[10px] text-dark-warm mt-1 font-sans">Hot-edit runtime variables for intervention.</p>
+                  <p className="text-[10px] text-dark-warm mt-1 font-sans">运行时变量热修改，支持即时干预。</p>
                 </div>
                 <div className="flex-1 overflow-y-auto p-6 space-y-6">
                   {Object.entries(variables).map(([name, varObj]) => (
@@ -329,7 +329,7 @@ export const Instances: React.FC = () => {
                     </div>
                   ))}
                   <Button variant="outline" size="sm" className="w-full text-[10px] font-bold border-dashed">
-                    + Inject New Variable
+                    + 注入新变量
                   </Button>
                 </div>
               </div>
@@ -338,8 +338,8 @@ export const Instances: React.FC = () => {
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center text-stone-gray/40">
             <Terminal size={64} className="mb-6 opacity-20" />
-            <p className="text-lg font-serif">Select an instance to begin intervention.</p>
-            <p className="text-sm font-sans mt-2">Support for log diagnostics, variable hot-editing, and node retries.</p>
+            <p className="text-lg font-serif">选择左侧异常实例进入诊断控制台</p>
+            <p className="text-sm font-sans mt-2">支持智能日志分析、变量热修改与节点重试</p>
           </div>
         )}
       </div>

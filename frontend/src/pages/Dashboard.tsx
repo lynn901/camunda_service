@@ -36,16 +36,16 @@ export const Dashboard: React.FC = () => {
   };
 
   const kpiData = [
-    { label: 'Active Instances', value: stats.activeInstances, icon: Activity, color: 'text-terracotta' },
-    { label: 'Total Models', value: stats.totalModels, icon: GitBranch, color: 'text-stone-gray' },
-    { label: 'System Incidents', value: stats.incidents, icon: ShieldAlert, color: 'text-crimson' },
+    { label: '活跃实例数', value: stats.activeInstances, icon: Activity, color: 'text-terracotta' },
+    { label: '已部署模型', value: stats.totalModels, icon: GitBranch, color: 'text-stone-gray' },
+    { label: '系统异常数', value: stats.incidents, icon: ShieldAlert, color: 'text-crimson' },
   ];
 
   return (
     <div className="space-y-12 animate-in fade-in">
       <div>
-        <h1 className="text-4xl font-serif text-anthropic-black mb-3">System Dashboard</h1>
-        <p className="text-olive-gray font-sans text-lg">Real-time monitoring and operational status of your workflow engine.</p>
+        <h1 className="text-4xl font-serif text-anthropic-black mb-3">系统大盘</h1>
+        <p className="text-olive-gray font-sans text-lg">工作流引擎运行状态与核心指标实时监控。</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -66,12 +66,12 @@ export const Dashboard: React.FC = () => {
 
       <div className="space-y-6">
         <div className="flex justify-between items-center px-2">
-          <h3 className="text-2xl font-serif text-anthropic-black">Model Matrix</h3>
+          <h3 className="text-2xl font-serif text-anthropic-black">流程模型矩阵 (Model Matrix)</h3>
           <button 
             onClick={() => navigate('/models')}
             className="text-sm text-terracotta font-sans font-bold hover:underline"
           >
-            Manage All Models →
+            管理所有模型 →
           </button>
         </div>
         
@@ -84,7 +84,7 @@ export const Dashboard: React.FC = () => {
             ))
           ) : models.length === 0 ? (
             <div className="col-span-full p-12 text-center text-stone-gray font-sans italic bg-white rounded-comfortable border border-dashed border-border-warm">
-              No workflow models deployed yet.
+              暂无已部署的工作流模型。
             </div>
           ) : models.slice(0, 8).map((model) => (
             <Card 
@@ -106,8 +106,8 @@ export const Dashboard: React.FC = () => {
               <p className="text-[10px] text-stone-gray font-mono mb-4">{model.key}</p>
               
               <div className="flex justify-between items-center text-[10px] font-sans">
-                <span className="font-bold text-stone-gray uppercase tracking-tighter">Version V{model.version}</span>
-                <span className="text-olive-gray">{model.suspended ? 'Suspended' : 'Active'}</span>
+                <span className="font-bold text-stone-gray uppercase tracking-tighter">版本 V{model.version}</span>
+                <span className="text-olive-gray">{model.suspended ? '已挂起' : '运行中'}</span>
               </div>
             </Card>
           ))}

@@ -28,7 +28,7 @@ export const TriggerModal: React.FC<TriggerModalProps> = ({ isOpen, onClose, pro
       onSuccess();
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Invalid JSON or failed to start instance');
+      setError(err instanceof Error ? err.message : 'JSON 格式错误或启动实例失败');
     } finally {
       setLoading(false);
     }
@@ -40,7 +40,7 @@ export const TriggerModal: React.FC<TriggerModalProps> = ({ isOpen, onClose, pro
         <div className="flex justify-between items-center p-6 border-b border-dark-surface bg-dark-surface/50">
           <h3 className="text-xl font-serif text-ivory flex items-center gap-2">
             <Terminal className="w-5 h-5 text-terracotta" />
-            <span className="text-stone-gray">/trigger/</span>
+            <span className="text-stone-gray">/触发/</span>
             {process.key}
           </h3>
           <button onClick={onClose} className="text-stone-gray hover:text-ivory">
@@ -52,25 +52,25 @@ export const TriggerModal: React.FC<TriggerModalProps> = ({ isOpen, onClose, pro
           <div className="space-y-6">
             <div className="space-y-2">
               <label className="block text-xs font-sans font-bold text-stone-gray uppercase tracking-widest">
-                Business Key
-                <span className="ml-2 text-[10px] text-dark-warm normal-case font-normal">(Idempotent control identifier)</span>
+                业务流水号 (Business Key)
+                <span className="ml-2 text-[10px] text-dark-warm normal-case font-normal">(幂等控制与链路追踪标识)</span>
               </label>
               <input 
                 type="text" 
                 value={businessKey}
                 onChange={(e) => setBusinessKey(e.target.value)}
                 className="w-full bg-dark-surface border border-dark-warm rounded-generous px-4 py-2 text-ivory font-mono text-sm focus:outline-none focus:ring-1 focus:ring-terracotta transition-all"
-                placeholder="e.g., ORDER-8821"
+                placeholder="例如: ORDER-8821"
               />
             </div>
             
             <div className="p-4 bg-dark-surface/30 border border-dark-warm rounded-generous">
-              <h4 className="text-xs font-serif text-ivory mb-2">Model Information</h4>
+              <h4 className="text-xs font-serif text-ivory mb-2">模型信息</h4>
               <p className="text-xs text-stone-gray font-sans">
-                Version: <span className="text-terracotta font-mono">{process.version}</span>
+                版本: <span className="text-terracotta font-mono">V{process.version}</span>
               </p>
               <p className="text-xs text-stone-gray font-sans mt-1">
-                Name: <span className="text-ivory">{process.name || process.key}</span>
+                名称: <span className="text-ivory">{process.name || process.key}</span>
               </p>
             </div>
           </div>
@@ -78,7 +78,7 @@ export const TriggerModal: React.FC<TriggerModalProps> = ({ isOpen, onClose, pro
           <div className="space-y-2 flex flex-col">
             <label className="flex items-center gap-2 text-xs font-sans font-bold text-stone-gray uppercase tracking-widest">
               <Code className="w-3.5 h-3.5" />
-              Initial Variables (JSON)
+              初始化变量 (JSON Payload)
             </label>
             <textarea 
               value={variablesJson}
@@ -92,16 +92,16 @@ export const TriggerModal: React.FC<TriggerModalProps> = ({ isOpen, onClose, pro
         {error && <div className="px-8 pb-4 text-xs text-crimson font-sans">{error}</div>}
 
         <div className="p-6 border-t border-dark-surface bg-dark-surface/50 flex justify-between items-center">
-          <span className="text-[10px] text-stone-gray font-mono">Target Engine: default-engine (REST API)</span>
+          <span className="text-[10px] text-stone-gray font-mono">目标引擎: default-engine (REST API)</span>
           <div className="flex gap-3">
-            <Button variant="outline" onClick={onClose} className="border-dark-warm text-stone-gray hover:text-ivory hover:bg-dark-surface">Cancel</Button>
+            <Button variant="outline" onClick={onClose} className="border-dark-warm text-stone-gray hover:text-ivory hover:bg-dark-surface">取消</Button>
             <Button 
               variant="terracotta" 
               disabled={loading}
               onClick={handleTrigger}
             >
               <PlayCircle className="mr-2 w-4 h-4" />
-              {loading ? 'Starting...' : 'Launch Instance'}
+              {loading ? '正在启动...' : '启动流程实例'}
             </Button>
           </div>
         </div>

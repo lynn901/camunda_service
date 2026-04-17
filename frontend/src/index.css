@@ -1,33 +1,64 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-:root {
-  --parchment: #f5f4ed;
-  --ivory: #faf9f5;
-  --anthropic-black: #141413;
-  --terracotta: #c96442;
-  --olive-gray: #5e5d59;
-  --border-cream: #f0eee6;
+@theme {
+  --color-parchment: #f5f4ed;
+  --color-ivory: #faf9f5;
+  --color-anthropic-black: #141413;
+  --color-terracotta: #c96442;
+  --color-coral: #d97757;
+  --color-crimson: #b53333;
+  --color-focus-blue: #3898ec;
+  --color-warm-sand: #e8e6dc;
+  --color-dark-surface: #30302e;
+  --color-charcoal-warm: #4d4c48;
+  --color-olive-gray: #5e5d59;
+  --color-stone-gray: #87867f;
+  --color-dark-warm: #3d3d3a;
+  --color-warm-silver: #b0aea5;
+  --color-border-cream: #f0eee6;
+  --color-border-warm: #e8e6dc;
+  --color-border-dark: #30302e;
+  --color-ring-warm: #d1cfc5;
+  --color-ring-subtle: #dedc01;
+  --color-ring-deep: #c2c0b6;
+
+  --font-serif: Georgia, serif;
+  --font-sans: Inter, system-ui, sans-serif;
+  --font-mono: "Courier New", monospace;
+
+  --radius-sharp: 4px;
+  --radius-subtle: 6px;
+  --radius-comfortable: 8px;
+  --radius-generous: 12px;
+  --radius-very: 16px;
+  --radius-highly: 24px;
+  --radius-maximum: 32px;
+
+  --shadow-ring: 0 0 0 1px var(--color-ring-warm);
+  --shadow-whisper: 0 4px 24px rgba(0, 0, 0, 0.05);
 }
 
-body {
-  background-color: var(--parchment);
-  color: var(--anthropic-black);
-  font-family: 'Inter', system-ui, sans-serif;
-  line-height: 1.60;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@layer base {
+  body {
+    background-color: var(--color-parchment);
+    color: var(--color-anthropic-black);
+    font-family: var(--font-sans);
+    line-height: 1.60;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    line-height: 1.10;
+  }
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: 'Georgia', serif;
-  font-weight: 500;
-  line-height: 1.10;
-}
-
+/* Custom utility for ring shadow to use theme variables correctly in v4 if needed, 
+   though the --shadow-ring above should map to .shadow-ring */
 .ring-shadow {
-  box-shadow: 0 0 0 1px var(--ring-color, #e8e6dc);
+  box-shadow: 0 0 0 1px var(--color-border-warm);
 }
 
 .whisper-shadow {
