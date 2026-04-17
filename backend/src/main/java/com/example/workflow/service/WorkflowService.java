@@ -102,6 +102,7 @@ public class WorkflowService {
         // 3. System Health (基于 Micrometer 和 JVM MXBean)
         MetricsDto.SystemHealth systemHealth = new MetricsDto.SystemHealth();
         OperatingSystemMXBean osBean = ManagementFactory.getOperatingSystemMXBean();
+        // TODO: For more robust cross-platform CPU monitoring, consider Micrometer's system.cpu.usage
         systemHealth.setCpuUsage(osBean.getSystemLoadAverage()); // 注意：Windows 下可能返回 -1
         
         Runtime runtime = Runtime.getRuntime();

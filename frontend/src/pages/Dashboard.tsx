@@ -14,7 +14,8 @@ export const Dashboard: React.FC = () => {
   const [engineStatus, setEngineStatus] = useState<'online' | 'offline'>('offline');
   const [autoRefresh, setAutoRefresh] = useState(false);
   const [refreshInterval, setRefreshInterval] = useState(30); // seconds
-  const [dateRange, setDateRange] = useState('last-24h');
+  // TODO: Implement backend support for date range filtering in future tracks
+  const [dateRange, setDateRange] = useState('all-time');
   
   const navigate = useNavigate();
 
