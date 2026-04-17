@@ -1,7 +1,7 @@
 # Implementation Plan: Overall Overview (整体概览) Redesign
 
 ## Phase 1: Backend API Enhancements
-- [ ] Task: Create `MetricsDto` to hold Process Stats, Task Metrics, and System Health.
+- [x] Task: Create `MetricsDto` to hold Process Stats, Task Metrics, and System Health. 88e0998
 - [ ] Task: Implement `WorkflowService.getOverallMetrics()` to aggregate data from Camunda Java API (HistoryService, ManagementService) and System Actuator.
     - [ ] Write unit tests for data aggregation.
     - [ ] Implement aggregation logic.
