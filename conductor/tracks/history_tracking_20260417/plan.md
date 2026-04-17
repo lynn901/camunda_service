@@ -30,3 +30,6 @@ Build the history dashboard and visualization.
     - [ ] Integrate `bpmn-js` and implement executed path highlighting.
     - [ ] Verify visual accuracy against actual history data.
 - [~] Task: Conductor - User Manual Verification 'Phase 2: Frontend Implementation' (Protocol in workflow.md) (Protocol in workflow.md)
+
+## Phase: Review Fixes
+- [x] Task: Apply review suggestions d36e84a
