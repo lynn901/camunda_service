@@ -57,6 +57,17 @@
 
 /* Custom utility for ring shadow to use theme variables correctly in v4 if needed, 
    though the --shadow-ring above should map to .shadow-ring */
+@layer utilities {
+  .animate-pulse-subtle {
+    animation: pulse-subtle 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes pulse-subtle {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.85; border-color: rgba(181, 51, 51, 0.6); }
+  }
+}
+
 .ring-shadow {
   box-shadow: 0 0 0 1px var(--color-border-warm);
 }

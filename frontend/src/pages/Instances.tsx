@@ -10,7 +10,10 @@ import {
   XCircle,
   RefreshCw,
   FastForward,
-  Settings
+  Settings,
+  Save,
+  ShieldAlert,
+  Loader2
 } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
@@ -30,12 +33,16 @@ export const Instances: React.FC = () => {
   const [steps, setSteps] = useState<HistoricActivityInstance[]>([]);
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [variables, setVariables] = useState<Record<string, Variable>>({});
+  const [editingVariables, setEditingVariables] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [filterDefinition, setFilterDefinition] = useState<string>('All');
 
   useEffect(() => {
     fetchInitialData();
+    const interval = setInterval(fetchInstances, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
@@ -58,12 +65,10 @@ export const Instances: React.FC = () => {
   };
 
   const fetchInstances = async () => {
-    setLoading(true);
     try {
       const filter = filterDefinition === 'All' ? {} : { processDefinitionKey: filterDefinition };
       const data = await camundaService.getProcessInstances(filter);
       
-      // Fetch incidents for each instance to determine state
       const allIncidents = await camundaService.getIncidents();
       
       const instancesWithState = data.map(inst => {
@@ -91,7 +96,6 @@ export const Instances: React.FC = () => {
         camundaService.getVariables(id)
       ]);
       
-      // Merge incident info into steps
       const stepsWithStatus = historicSteps.map(step => {
         const incident = instanceIncidents.find(inc => inc.activityId === step.activityId);
         return {
@@ -103,10 +107,49 @@ export const Instances: React.FC = () => {
       setSteps(stepsWithStatus);
       setIncidents(instanceIncidents);
       setVariables(instanceVars);
+      
+      // Initialize editing state
+      const initialEdit: Record<string, any> = {};
+      Object.entries(instanceVars).forEach(([k, v]) => {
+        initialEdit[k] = v.value;
+      });
+      setEditingVariables(initialEdit);
     } catch (err) {
       console.error('Failed to fetch details', err);
     } finally {
       setDetailLoading(false);
+    }
+  };
+
+  const handleRetry = async (incident: Incident) => {
+    if (!incident.jobId) return;
+    setActionLoading(`retry-${incident.id}`);
+    try {
+      await camundaService.retryJob(incident.jobId, 3);
+      // Wait a bit for engine to process
+      setTimeout(() => {
+        fetchInstances();
+        if (selectedInstance) fetchInstanceDetails(selectedInstance.id);
+        setActionLoading(null);
+      }, 1000);
+    } catch (err) {
+      alert('重试操作失败');
+      setActionLoading(null);
+    }
+  };
+
+  const handleSaveVariable = async (name: string) => {
+    if (!selectedInstance) return;
+    const value = editingVariables[name];
+    const type = variables[name].type;
+    setActionLoading(`var-${name}`);
+    try {
+      await camundaService.updateVariable(selectedInstance.id, name, value, type);
+      fetchInstanceDetails(selectedInstance.id);
+    } catch (err) {
+      alert('保存变量失败');
+    } finally {
+      setActionLoading(null);
     }
   };
 
@@ -115,9 +158,8 @@ export const Instances: React.FC = () => {
     try {
       await camundaService.suspendProcessInstance(selectedInstance.id);
       fetchInstances();
-      if (selectedInstance) fetchInstanceDetails(selectedInstance.id);
     } catch (err) {
-      alert('Failed to suspend');
+      alert('挂起操作失败');
     }
   };
 
@@ -126,9 +168,8 @@ export const Instances: React.FC = () => {
     try {
       await camundaService.activateProcessInstance(selectedInstance.id);
       fetchInstances();
-      if (selectedInstance) fetchInstanceDetails(selectedInstance.id);
     } catch (err) {
-      alert('Failed to activate');
+      alert('激活操作失败');
     }
   };
 
@@ -181,15 +222,20 @@ export const Instances: React.FC = () => {
             <Card 
               key={inst.id} 
               onClick={() => setSelectedInstance(inst)}
-              className={`p-4 cursor-pointer transition-all ${selectedInstance?.id === inst.id ? 'ring-2 ring-terracotta bg-white' : 'hover:bg-white'}`}
+              className={`p-4 cursor-pointer transition-all ${
+                selectedInstance?.id === inst.id ? 'ring-2 ring-terracotta bg-white' : 'hover:bg-white'
+              } ${inst.state === 'Failed' ? 'border-crimson/30 animate-pulse-subtle' : ''}`}
             >
               <div className="flex justify-between items-start mb-3">
                 <div className="overflow-hidden">
-                  <span className="font-mono text-[10px] font-bold text-stone-gray block truncate">{inst.id}</span>
+                  <div className="flex items-center gap-2">
+                    {inst.state === 'Failed' && <ShieldAlert size={12} className="text-crimson" />}
+                    <span className="font-mono text-[10px] font-bold text-stone-gray block truncate">{inst.id}</span>
+                  </div>
                   <p className="text-[10px] text-stone-gray mt-1 truncate">流水号: <span className="text-anthropic-black font-medium">{inst.businessKey || '无'}</span></p>
                 </div>
                 <span className={`text-[9px] font-bold px-2 py-0.5 rounded-highly uppercase tracking-tighter border ${
-                  inst.state === 'Failed' ? 'bg-crimson/5 text-crimson border-crimson/20' : 
+                  inst.state === 'Failed' ? 'bg-crimson/5 text-crimson border-crimson/20 shadow-[0_0_8px_rgba(181,51,51,0.1)]' : 
                   inst.state === 'Suspended' ? 'bg-stone-gray/5 text-stone-gray border-stone-gray/20' : 
                   'bg-terracotta/5 text-terracotta border-terracotta/20'
                 }`}>
@@ -221,7 +267,7 @@ export const Instances: React.FC = () => {
                 <div className="flex gap-4 text-[10px] font-sans text-stone-gray">
                   <span>业务流水号: <span className="text-warm-silver font-mono">{selectedInstance.businessKey || '无'}</span></span>
                   <span className="w-[1px] bg-dark-warm h-3 mt-0.5" />
-                  <span>状态: <span className={selectedInstance.state === 'Failed' ? 'text-crimson' : 'text-terracotta'}>{selectedInstance.state}</span></span>
+                  <span>状态: <span className={selectedInstance.state === 'Failed' ? 'text-crimson font-bold' : 'text-terracotta font-bold'}>{selectedInstance.state}</span></span>
                 </div>
               </div>
               <div className="flex gap-2">
@@ -249,56 +295,76 @@ export const Instances: React.FC = () => {
                 </h3>
 
                 {detailLoading ? (
-                  <div className="italic text-stone-gray text-sm font-sans">正在加载链路状态...</div>
+                  <div className="italic text-stone-gray text-sm font-sans flex items-center gap-2">
+                    <Loader2 size={14} className="animate-spin" /> 正在加载链路状态...
+                  </div>
                 ) : (
                   <div className="relative border-l border-border-warm ml-4 space-y-8 pb-8">
-                    {steps.filter(s => s.activityType !== 'processDefinition').map((step, idx) => (
-                      <div key={step.id} className="relative pl-10">
-                        {/* Dot */}
-                        <div className={`
-                          absolute -left-[13px] top-0 w-6 h-6 rounded-full flex items-center justify-center border-2 border-white shadow-ring ring-border-cream
-                          ${step.status === 'Completed' ? 'bg-terracotta text-ivory' : 
-                            step.status === 'Running' ? 'bg-anthropic-black text-ivory animate-pulse' : 
-                            step.status === 'Failed' ? 'bg-crimson text-ivory' : 'bg-ivory text-stone-gray'}
-                        `}>
-                          {step.status === 'Completed' ? <CheckCircle size={12} /> : 
-                           step.status === 'Failed' ? <XCircle size={12} /> : 
-                           <span className="text-[10px] font-bold">{idx + 1}</span>}
-                        </div>
-
-                        {/* Step Card */}
-                        <Card className={`p-4 ${step.status === 'Failed' ? 'bg-crimson/5 border-crimson/10' : 'bg-white'}`}>
-                          <div className="flex justify-between items-start mb-2">
-                            <h4 className="text-sm font-serif font-bold text-anthropic-black flex items-center gap-2">
-                              {step.activityName || step.activityId}
-                              <span className="text-[9px] font-mono font-bold bg-ivory border border-border-cream text-stone-gray px-1.5 py-0.5 rounded-subtle uppercase tracking-widest">
-                                {step.activityType}
-                              </span>
-                            </h4>
-                            <span className="text-[10px] font-mono text-stone-gray">
-                              {new Date(step.startTime).toLocaleTimeString()}
-                            </span>
+                    {steps.filter(s => s.activityType !== 'processDefinition').map((step, idx) => {
+                      const incident = incidents.find(inc => inc.activityId === step.activityId);
+                      return (
+                        <div key={step.id} className="relative pl-10">
+                          <div className={`
+                            absolute -left-[13px] top-0 w-6 h-6 rounded-full flex items-center justify-center border-2 border-white shadow-ring ring-border-cream
+                            ${step.status === 'Completed' ? 'bg-terracotta text-ivory' : 
+                              step.status === 'Running' ? 'bg-anthropic-black text-ivory animate-pulse' : 
+                              step.status === 'Failed' ? 'bg-crimson text-ivory shadow-[0_0_12px_rgba(181,51,51,0.4)]' : 'bg-ivory text-stone-gray'}
+                          `}>
+                            {step.status === 'Completed' ? <CheckCircle size={12} /> : 
+                             step.status === 'Failed' ? <XCircle size={12} /> : 
+                             <span className="text-[10px] font-bold">{idx + 1}</span>}
                           </div>
-                          
-                          {step.status === 'Failed' && incidents.find(inc => inc.activityId === step.activityId) && (
-                            <div className="mt-4 border-t border-crimson/10 pt-4 space-y-3">
-                              <p className="text-[10px] font-sans font-bold text-crimson uppercase tracking-widest">异常堆栈日志 (Exception Stack Trace)</p>
-                              <div className="bg-anthropic-black text-coral p-4 rounded-generous text-[11px] font-mono whitespace-pre-wrap overflow-x-auto border border-dark-surface shadow-inner max-h-40 overflow-y-auto leading-relaxed">
-                                {incidents.find(inc => inc.activityId === step.activityId)?.incidentMessage}
-                              </div>
-                              <div className="flex gap-3">
-                                <Button size="sm" variant="terracotta" className="flex-1">
-                                  <RefreshCw size={14} className="mr-2" /> 原点重试 (Retry)
-                                </Button>
-                                <Button size="sm" variant="outline" className="flex-1">
-                                  <FastForward size={14} className="mr-2" /> 强制跳过 (Skip)
-                                </Button>
+
+                          <Card className={`p-4 transition-all ${step.status === 'Failed' ? 'bg-crimson/5 border-crimson/10 ring-1 ring-crimson/20' : 'bg-white'}`}>
+                            <div className="flex justify-between items-start mb-2">
+                              <h4 className="text-sm font-serif font-bold text-anthropic-black flex items-center gap-2">
+                                {step.activityName || step.activityId}
+                                <span className="text-[9px] font-mono font-bold bg-ivory border border-border-cream text-stone-gray px-1.5 py-0.5 rounded-subtle uppercase tracking-widest">
+                                  {step.activityType}
+                                </span>
+                              </h4>
+                              <div className="flex flex-col items-end">
+                                <span className="text-[10px] font-mono text-stone-gray">
+                                  {new Date(step.startTime).toLocaleTimeString()}
+                                </span>
+                                {step.durationInMillis && (
+                                  <span className="text-[9px] text-dark-warm font-sans">耗时: {(step.durationInMillis / 1000).toFixed(1)}s</span>
+                                )}
                               </div>
                             </div>
-                          )}
-                        </Card>
-                      </div>
-                    ))}
+                            
+                            {step.status === 'Failed' && incident && (
+                              <div className="mt-4 border-t border-crimson/10 pt-4 space-y-3">
+                                <div className="flex justify-between items-center">
+                                  <p className="text-[10px] font-sans font-bold text-crimson uppercase tracking-widest flex items-center gap-1">
+                                    <ShieldAlert size={10} /> 异常堆栈日志
+                                  </p>
+                                  <span className="text-[9px] font-mono text-dark-warm">Job ID: {incident.jobId || 'N/A'}</span>
+                                </div>
+                                <div className="bg-anthropic-black text-coral p-4 rounded-generous text-[11px] font-mono whitespace-pre-wrap overflow-x-auto border border-dark-surface shadow-inner max-h-40 overflow-y-auto leading-relaxed">
+                                  {incident.incidentMessage}
+                                </div>
+                                <div className="flex gap-3">
+                                  <Button 
+                                    size="sm" 
+                                    variant="terracotta" 
+                                    className="flex-1"
+                                    disabled={actionLoading === `retry-${incident.id}`}
+                                    onClick={() => handleRetry(incident)}
+                                  >
+                                    {actionLoading === `retry-${incident.id}` ? <Loader2 size={14} className="animate-spin mr-2" /> : <RefreshCw size={14} className="mr-2" />}
+                                    原点重试 (Retry)
+                                  </Button>
+                                  <Button size="sm" variant="outline" className="flex-1">
+                                    <FastForward size={14} className="mr-2" /> 强制跳过 (Skip)
+                                  </Button>
+                                </div>
+                              </div>
+                            )}
+                          </Card>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>
@@ -315,20 +381,31 @@ export const Instances: React.FC = () => {
                 <div className="flex-1 overflow-y-auto p-6 space-y-6">
                   {Object.entries(variables).map(([name, varObj]) => (
                     <div key={name} className="space-y-1 group">
-                      <label className="text-[10px] font-mono font-bold text-stone-gray uppercase tracking-widest flex justify-between">
-                        {name}
-                        <span className="text-[9px] lowercase opacity-50">{varObj.type}</span>
-                      </label>
-                      <div className="relative">
+                      <div className="flex justify-between items-center">
+                        <label className="text-[10px] font-mono font-bold text-stone-gray uppercase tracking-widest">
+                          {name}
+                        </label>
+                        <span className="text-[9px] lowercase opacity-50 font-sans italic">{varObj.type}</span>
+                      </div>
+                      <div className="relative flex gap-2">
                         <input 
                           type="text" 
-                          defaultValue={JSON.stringify(varObj.value)}
-                          className="w-full bg-white border border-border-warm rounded-subtle px-3 py-1.5 text-xs font-mono text-anthropic-black focus:outline-none focus:ring-1 focus:ring-terracotta transition-all"
+                          value={editingVariables[name] !== undefined ? (typeof editingVariables[name] === 'object' ? JSON.stringify(editingVariables[name]) : editingVariables[name]) : ''}
+                          onChange={(e) => setEditingVariables({...editingVariables, [name]: e.target.value})}
+                          className="flex-1 bg-white border border-border-warm rounded-subtle px-3 py-1.5 text-xs font-mono text-anthropic-black focus:outline-none focus:ring-1 focus:ring-terracotta transition-all"
                         />
+                        <button 
+                          onClick={() => handleSaveVariable(name)}
+                          disabled={actionLoading === `var-${name}`}
+                          className="p-1.5 text-stone-gray hover:text-terracotta transition-colors bg-white border border-border-warm rounded-subtle"
+                          title="保存变量"
+                        >
+                          {actionLoading === `var-${name}` ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                        </button>
                       </div>
                     </div>
                   ))}
-                  <Button variant="outline" size="sm" className="w-full text-[10px] font-bold border-dashed">
+                  <Button variant="outline" size="sm" className="w-full text-[10px] font-bold border-dashed text-stone-gray hover:text-terracotta">
                     + 注入新变量
                   </Button>
                 </div>
@@ -338,7 +415,7 @@ export const Instances: React.FC = () => {
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center text-stone-gray/40">
             <Terminal size={64} className="mb-6 opacity-20" />
-            <p className="text-lg font-serif">选择左侧异常实例进入诊断控制台</p>
+            <p className="text-lg font-serif text-stone-gray">选择左侧异常实例进入诊断控制台</p>
             <p className="text-sm font-sans mt-2">支持智能日志分析、变量热修改与节点重试</p>
           </div>
         )}

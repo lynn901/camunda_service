@@ -12,17 +12,26 @@ interface UploadModalProps {
 export const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose, onSuccess }) => {
   const [file, setFile] = useState<File | null>(null);
   const [deploymentName, setDeploymentName] = useState('');
+  const [category, setCategory] = useState('General');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   if (!isOpen) return null;
+
+  const categories = [
+    { label: '基础设施', value: 'Infrastructure' },
+    { label: '资源调度', value: 'ResourceScheduling' },
+    { label: '网络配置', value: 'Networking' },
+    { label: '数据保护', value: 'DataProtection' },
+    { label: '通用', value: 'General' }
+  ];
 
   const handleUpload = async () => {
     if (!file || !deploymentName) return;
     setLoading(true);
     setError(null);
     try {
-      await camundaService.deployModel(file, deploymentName);
+      await camundaService.deployModel(file, deploymentName, category);
       onSuccess();
       onClose();
     } catch (err) {
@@ -73,17 +82,33 @@ export const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose, onSuc
             <p className="text-xs text-stone-gray mt-2">支持格式: .bpmn, .xml</p>
           </div>
 
-          <div className="space-y-2">
-            <label className="block text-xs font-sans font-bold text-stone-gray uppercase tracking-widest">
-              部署名称 (Deployment Name)
-            </label>
-            <input 
-              type="text" 
-              value={deploymentName}
-              onChange={(e) => setDeploymentName(e.target.value)}
-              className="w-full bg-white border border-border-warm rounded-generous px-4 py-2 text-sm font-sans focus:outline-none focus:ring-1 focus:ring-terracotta transition-all"
-              placeholder="例如: 订单处理流程 V1"
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="block text-xs font-sans font-bold text-stone-gray uppercase tracking-widest">
+                部署名称
+              </label>
+              <input 
+                type="text" 
+                value={deploymentName}
+                onChange={(e) => setDeploymentName(e.target.value)}
+                className="w-full bg-white border border-border-warm rounded-generous px-4 py-2 text-sm font-sans focus:outline-none focus:ring-1 focus:ring-terracotta transition-all"
+                placeholder="流程名称"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="block text-xs font-sans font-bold text-stone-gray uppercase tracking-widest">
+                业务分类
+              </label>
+              <select 
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="w-full bg-white border border-border-warm rounded-generous px-4 py-2 text-sm font-sans focus:outline-none focus:ring-1 focus:ring-terracotta transition-all appearance-none"
+              >
+                {categories.map(c => (
+                  <option key={c.value} value={c.value}>{c.label}</option>
+                ))}
+              </select>
+            </div>
           </div>
 
           {error && <p className="text-xs text-crimson font-sans">{error}</p>}

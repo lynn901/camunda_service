@@ -122,17 +122,25 @@ export const camundaService = {
     return response.json();
   },
 
+  async getEngineVersion(): Promise<{ version: string }> {
+    const response = await fetch(`${ENGINE_REST_URL}/version`);
+    if (!response.ok) throw new Error('Failed to fetch engine version');
+    return response.json();
+  },
+
   async getDeployments(): Promise<Deployment[]> {
     const response = await fetch(`${ENGINE_REST_URL}/deployment`);
     if (!response.ok) throw new Error('Failed to fetch deployments');
     return response.json();
   },
 
-  async deployModel(file: File, deploymentName: string): Promise<Deployment> {
+  async deployModel(file: File, deploymentName: string, category: string = 'General'): Promise<Deployment> {
     const formData = new FormData();
-    formData.append('deployment-name', deploymentName);
+    formData.append('deployment-name', `${category}: ${deploymentName}`);
     formData.append('deployment-source', 'OpsFlowEngine Console');
     formData.append('data', file);
+    // Note: Camunda 7 deployment API doesn't support custom properties easily without complex multi-part.
+    // We'll use source or name for category if needed, but for now we'll just implement the UI for it.
 
     const response = await fetch(`${ENGINE_REST_URL}/deployment/create`, {
       method: 'POST',
@@ -242,6 +250,15 @@ export const camundaService = {
     if (!response.ok) throw new Error('Failed to terminate process instance');
   },
 
+  async retryJob(jobId: string, retries: number = 3) {
+    const response = await fetch(`${ENGINE_REST_URL}/job/${jobId}/retries`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ retries })
+    });
+    if (!response.ok) throw new Error('Failed to retry job');
+  },
+
   async getExternalTasks(): Promise<ExternalTask[]> {
     const response = await fetch(`${ENGINE_REST_URL}/external-task`);
     if (!response.ok) throw new Error('Failed to fetch external tasks');
@@ -256,16 +273,56 @@ export const camundaService = {
   },
 
   async getStatistics() {
-    const [instances, incidents, definitions] = await Promise.all([
+    const [instances, incidents, definitions, historyInstances] = await Promise.all([
       this.getProcessInstances(),
       this.getIncidents(),
-      this.getProcessDefinitions()
+      this.getProcessDefinitions(),
+      fetch(`${ENGINE_REST_URL}/history/process-instance?finished=true`).then(res => res.json().catch(() => []))
     ]);
+
+    const modelStats: Record<string, { active: number, failed: number, completed: number, successRate: string }> = {};
+    definitions.forEach(def => {
+      modelStats[def.key] = { active: 0, failed: 0, completed: 0, successRate: '0%' };
+    });
+
+    instances.forEach(inst => {
+      const key = inst.definitionId.split(':')[0];
+      const isFailed = incidents.some(inc => inc.processInstanceId === inst.id);
+      if (modelStats[key]) {
+        if (isFailed) {
+          modelStats[key].failed++;
+        } else {
+          modelStats[key].active++;
+        }
+      }
+    });
+
+    if (Array.isArray(historyInstances)) {
+      historyInstances.forEach((hist: any) => {
+        const key = hist.processDefinitionKey;
+        if (modelStats[key]) {
+          modelStats[key].completed++;
+        }
+      });
+    }
+
+    // Calculate success rate
+    Object.keys(modelStats).forEach(key => {
+      const stats = modelStats[key];
+      const totalFinished = stats.completed;
+      const totalAttempted = stats.completed + stats.failed;
+      if (totalAttempted > 0) {
+        stats.successRate = Math.round((totalFinished / totalAttempted) * 100) + '%';
+      } else {
+        stats.successRate = '100%'; // No attempts = clean slate
+      }
+    });
 
     return {
       activeInstances: instances.length,
       incidents: incidents.length,
-      totalModels: definitions.length
+      totalModels: definitions.length,
+      modelStats
     };
   }
 };
