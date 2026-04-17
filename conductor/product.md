@@ -11,4 +11,5 @@ A centralized workflow engine (Workflow Hub) built on Camunda 7.20, designed to 
 - **BPMN 2.0 Engine:** Executes standards-compliant process models.
 - **Microservices Orchestration:** Delegates tasks using webhooks and Camunda's external task pattern.
 - **Real-time Monitoring:** React-based dashboard for viewing process execution, states, and variable management.
+- **Historical Analysis:** Searchable process history with visual execution path highlighting.
 - **Secure Access:** Built-in Basic Auth against Camunda Identity Service.

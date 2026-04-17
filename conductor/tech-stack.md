@@ -12,6 +12,7 @@
 - **Language:** TypeScript
 - **Styling:** Vanilla CSS (Custom Design System)
 - **Libraries:** Lucide React (Icons), bpmn-js (Process Visualization)
+- **Testing:** Vitest, React Testing Library
 
 ## Data & Infrastructure
 - **Database:** PostgreSQL
