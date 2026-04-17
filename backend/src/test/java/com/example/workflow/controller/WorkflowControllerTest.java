@@ -2,6 +2,7 @@ package com.example.workflow.controller;
 
 import com.example.workflow.dto.HistoricActivityInstanceDto;
 import com.example.workflow.dto.HistoricProcessInstanceDto;
+import com.example.workflow.dto.MetricsDto;
 import com.example.workflow.service.WorkflowService;
 import org.camunda.bpm.engine.ProcessEngine;
 import org.camunda.bpm.spring.boot.starter.property.CamundaBpmProperties;
@@ -82,5 +83,22 @@ class WorkflowControllerTest {
                 .andExpect(jsonPath("$[0].activityId").value("act-1"))
                 .andExpect(jsonPath("$[0].activityName").value("Task 1"))
                 .andExpect(jsonPath("$[0].activityType").value("userTask"));
+    }
+
+    @Test
+    void shouldGetOverallMetrics() throws Exception {
+        // Given
+        MetricsDto metrics = new MetricsDto();
+        MetricsDto.ProcessStats stats = new MetricsDto.ProcessStats();
+        stats.setTotalInstances(100L);
+        metrics.setProcessStats(stats);
+
+        when(workflowService.getOverallMetrics()).thenReturn(metrics);
+
+        // When & Then
+        mockMvc.perform(get("/api/workflow/metrics")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.processStats.totalInstances").value(100));
     }
 }

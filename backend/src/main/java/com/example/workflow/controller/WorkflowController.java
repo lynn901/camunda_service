@@ -2,6 +2,7 @@ package com.example.workflow.controller;
 
 import com.example.workflow.dto.HistoricActivityInstanceDto;
 import com.example.workflow.dto.HistoricProcessInstanceDto;
+import com.example.workflow.dto.MetricsDto;
 import com.example.workflow.service.WorkflowService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +34,7 @@ import java.util.Map;
  * <li>POST /api/workflow/signal/{signalName} — 广播信号</li>
  * <li>GET /api/workflow/history — 查询历史实例</li>
  * <li>GET /api/workflow/definitions — 查询已部署流程定义</li>
+ * <li>GET /api/workflow/metrics — 获取全站概览指标</li>
  * </ul>
  */
 @RestController
@@ -227,5 +229,14 @@ public class WorkflowController {
     public ResponseEntity<List<Map<String, Object>>> getDefinitions() {
         List<Map<String, Object>> defs = workflowService.getDeployedProcessDefinitions();
         return ResponseEntity.ok(defs);
+    }
+
+    /**
+     * 获取全站概览指标。
+     */
+    @GetMapping("/metrics")
+    public ResponseEntity<MetricsDto> getMetrics() {
+        MetricsDto metrics = workflowService.getOverallMetrics();
+        return ResponseEntity.ok(metrics);
     }
 }
