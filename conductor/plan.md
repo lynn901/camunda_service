@@ -1,40 +1,27 @@
-# Master Implementation Plan: Enterprise Frontend Rewrite
+# Plan: Frontend 404 Fixes and Automated Testing
 
-## Background & Scope
-The goal is to replace the existing basic React frontend with a comprehensive, enterprise-grade admin system that covers 6 core workflow modules, customized for Chinese enterprise requirements. We will adopt a **Phased Module Delivery** strategy using an **Enterprise Admin Template** (e.g., Ant Design Pro).
+## Objective
+Address the 404 errors encountered on every page after local containerized deployment, add unit tests for frontend components, and implement automated end-to-end (E2E) testing for functional pages using Playwright.
 
-## Proposed Solution: Phased Delivery Strategy
+## 1. Fix 404 Errors (Deployment)
+The 404 errors are caused by Ant Design Pro defaulting to a remote demo server (`https://pro-api.ant-design-demo.workers.dev`) in production builds, and missing Nginx routing for `/api/`.
+- **Change `app.tsx`:** Update `request` configuration to set `baseURL: ''` so it uses relative paths, routing to Nginx.
+- **Update Nginx Config:** Add `location /api/` to `frontend/nginx.conf` and proxy it to the backend `http://camunda-workflow:8080/api/`.
+- **Backend Mock APIs:** Implement basic Spring Boot controllers for `/api/currentUser`, `/api/login/account`, and `/api/outLogin` to return mock data, satisfying Ant Design Pro's layout requirements and preventing immediate 404 redirects to the login screen.
 
-### Phase 1: Foundation & Workbench (User Center)
-*   **Setup:** Bootstrap the new Ant Design Pro project. Establish routing, Layouts, global state (Zustand), and the `authFetch` interceptor.
-*   **IAM Integration:** Implement dummy/local Organization & Permission mapping (Module 5 basics) to support Tenant and User context.
-*   **My To-Do & My Done:** Build the core task lists with advanced search.
-*   **Approval Panel:** Implement standard actions (Approve, Reject).
-*   **Diagram View:** Integrate `bpmn-js` viewer to highlight the current active node in My To-Do.
+## 2. Frontend Unit Testing
+Enhance the existing Jest configuration with comprehensive unit tests.
+- **Components:** Add a unit test for a common utility or a basic component (e.g., `tests/components/Footer.test.tsx`).
+- **Logic:** Add a unit test for formatting or utility functions.
 
-### Phase 2: Operations Monitoring (Cockpit Replacement)
-*   **Process Instances:** Build the global instance query and detailed view.
-*   **Variable Management:** UI to view and modify instance variables dynamically.
-*   **Incident Management:** Dashboard to view errors and trigger "Retry Job".
-*   **Admin Intervention:** Implement forced transfer, termination, and node skipping (using process instance modification API).
+## 3. Automated Functional Testing (E2E)
+Integrate Playwright for robust automated testing of functional pages.
+- **Setup:** Install `@playwright/test` in the frontend directory and generate a `playwright.config.ts`.
+- **Write Tests:** Create automated tests for the primary functional pages (e.g., `tests/e2e/workbench.spec.ts`, `tests/e2e/login.spec.ts`).
+- **Scripts:** Add an `e2e` script to `package.json` for running the Playwright tests locally or in CI.
+- **Fix Locale:** Force `test.use({ locale: 'zh-CN' });` in `workbench.spec.ts` so that the default English locale in the headless browser doesn't break tests expecting translated UI elements (e.g., '工作台').
 
-### Phase 3: Engine Management (Admin/Definition Layer)
-*   **Deployments:** UI for `.bpmn` uploads and deployment management.
-*   **Definitions:** Version control, Suspend/Activate toggles, XML viewing.
-
-### Phase 4: Process Modeler & Dynamic Forms
-*   **Web Modeler:** Deep integration of `bpmn-js` modeler with Camunda properties panel.
-*   **Dynamic Forms:** Integrate a JSON Schema-based form designer. Bind form schema IDs to BPMN `camunda:formKey`.
-*   **Advanced Chinese Routing:** Extend properties panel to configure rules for Countersign (加签) and Custom Reject (退回).
-
-### Phase 5: Statistics Dashboard & Refinement
-*   **Heatmaps:** Extend `bpmn-js` viewer to overlay execution times (green/yellow/red) based on history API data.
-*   **Analytics:** ECharts/AntV for trend lines and timeout rankings.
-*   **Complex Actions:** Implement the backend/frontend logic for "Reject to specific node" (using `process-instance/{id}/modification`).
-
-## Verification
-*   Each phase will be verified against the existing `order-process` and `cloud-host-workflow` engine data.
-*   Testing will ensure the new frontend seamlessly authenticates and fetches data exactly like the old one, but with advanced UI capabilities.
-
-## Next Action
-Once this master plan is approved, we will proceed to execute **Phase 1** (Bootstrapping the Enterprise Template and Workbench).
+## 4. Verification
+- [ ] Build the frontend container and verify that `/api/currentUser` is properly proxied to the backend and returns the mock data without 404s.
+- [ ] Run `npm run test` to verify unit tests pass.
+- [ ] Run `npx playwright test` to ensure functional pages render correctly and E2E scenarios pass.

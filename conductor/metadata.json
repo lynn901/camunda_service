@@ -1,0 +1,7 @@
+{
+  "id": "foundation-workbench",
+  "title": "Phase 1: Foundation & Workbench",
+  "status": "planned",
+  "priority": "high",
+  "description": "Establish the enterprise admin layout and core task management features (Workbench module)."
+}

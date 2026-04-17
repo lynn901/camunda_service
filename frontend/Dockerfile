@@ -1,26 +1,27 @@
 # ====== Build Stage ======
-FROM node:22-alpine as build-stage
+FROM node:20-slim AS build-stage
 WORKDIR /app
 
-# Install dependencies first for better caching
-COPY package*.json ./
-RUN npm ci
+# Enable pnpm if needed, but here we use npm for simplicity as per existing package.json
+# Using corepack to enable pnpm if it's preferred
+# RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# Copy source and build
+COPY package.json package-lock.json* ./
+RUN npm install --legacy-peer-deps
+
 COPY . .
 RUN npm run build
 
-# ====== Production Stage ======
-FROM nginx:alpine as production-stage
+# ====== Run Stage ======
+FROM nginx:stable-alpine
 
-# Remove default nginx config
-RUN rm /etc/nginx/conf.d/default.conf
-
-# Copy custom nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/
-
-# Copy React build files to Nginx docroot
+# Copy the build output to Nginx's default public directory
+# Ant Design Pro/Umi builds to 'dist' by default
 COPY --from=build-stage /app/dist /usr/share/nginx/html
 
+# Copy custom Nginx configuration to handle SPA routing
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
 EXPOSE 80
+
 CMD ["nginx", "-g", "daemon off;"]

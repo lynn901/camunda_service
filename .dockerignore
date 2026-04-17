@@ -1,0 +1,9 @@
+target
+.git
+.mvn
+.vscode
+*.jar
+.DS_Store
+frontend
+frontend-legacy
+node_modules
