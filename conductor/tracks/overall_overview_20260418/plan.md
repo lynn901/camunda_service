@@ -12,7 +12,7 @@
 
 ## Phase 2: Frontend Data Layer & Routing
 - [x] Task: Update Sidebar/Header navigation links from "Global Dashboard" to "Overall Overview" (整体概览). 3cc17fe
-- [ ] Task: Create `camundaService.getMetrics()` method to fetch data from the new backend endpoint, supporting date range parameters.
+- [x] Task: Create `camundaService.getMetrics()` method to fetch data from the new backend endpoint, supporting date range parameters. f5c5667
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Frontend Data Layer & Routing' (Protocol in workflow.md)
 
 ## Phase 3: Frontend UI Components (Widget Grid)
