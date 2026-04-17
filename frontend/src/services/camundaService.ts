@@ -113,6 +113,25 @@ export interface ExternalTask {
   priority: number;
 }
 
+export interface Metrics {
+  processStats: {
+    totalInstances: number;
+    runningInstances: number;
+    completedInstances: number;
+    suspendedInstances: number;
+  };
+  taskMetrics: {
+    taskBacklogs: number;
+    avgCompletionTime: number;
+    failureRate: number;
+  };
+  systemHealth: {
+    cpuUsage: number;
+    memoryUsage: number;
+    dbConnections: number;
+  };
+}
+
 const ENGINE_REST_URL = '/engine-rest';
 const API_BASE_URL = '/api/workflow';
 
@@ -124,7 +143,6 @@ export const camundaService = {
   },
 
   async getProcessDefinitionXml(id: string): Promise<{ bpmn20Xml: string }> {
-    // Check if id is a versioned ID (contains ':') or a key
     const url = id.includes(':') 
       ? `${ENGINE_REST_URL}/process-definition/${id}/xml`
       : `${ENGINE_REST_URL}/process-definition/key/${id}/xml`;
@@ -151,8 +169,6 @@ export const camundaService = {
     formData.append('deployment-name', `${category}: ${deploymentName}`);
     formData.append('deployment-source', 'OpsFlowEngine Console');
     formData.append('data', file);
-    // Note: Camunda 7 deployment API doesn't support custom properties easily without complex multi-part.
-    // We'll use source or name for category if needed, but for now we'll just implement the UI for it.
 
     const response = await fetch(`${ENGINE_REST_URL}/deployment/create`, {
       method: 'POST',
@@ -277,6 +293,12 @@ export const camundaService = {
     return response.json();
   },
 
+  async getMetrics(): Promise<Metrics> {
+    const response = await fetch(`${API_BASE_URL}/metrics`);
+    if (!response.ok) throw new Error('Failed to fetch metrics');
+    return response.json();
+  },
+
   async unlockExternalTask(id: string) {
     const response = await fetch(`${ENGINE_REST_URL}/external-task/${id}/unlock`, {
       method: 'POST',
@@ -292,7 +314,6 @@ export const camundaService = {
     if (!response.ok) throw new Error('Failed to fetch historic instances');
     const data = await response.json();
     
-    // Map backend DTO to frontend ProcessInstance interface
     return data.map((item: any) => ({
       id: item.instanceId,
       definitionId: item.processDefinitionKey,
@@ -312,16 +333,14 @@ export const camundaService = {
     if (!response.ok) throw new Error('Failed to fetch historic activities');
     const data = await response.json();
     
-    // Map backend DTO to frontend HistoricActivityInstance interface
     return data.map((item: any, index: number) => ({
-      id: `${item.activityId}-${index}`, // Unique key for rendering
+      id: `${item.activityId}-${index}`, 
       activityId: item.activityId,
       activityName: item.activityName,
       activityType: item.activityType,
       startTime: item.startTime,
       endTime: item.endTime,
       durationInMillis: item.durationInMillis,
-      // Fill in mandatory interface fields even if not provided by DTO
       parentActivityInstanceId: '',
       processDefinitionKey: '',
       processDefinitionId: '',
@@ -371,7 +390,6 @@ export const camundaService = {
       });
     }
 
-    // Calculate success rate
     Object.keys(modelStats).forEach(key => {
       const stats = modelStats[key];
       const totalFinished = stats.completed;
@@ -379,7 +397,7 @@ export const camundaService = {
       if (totalAttempted > 0) {
         stats.successRate = Math.round((totalFinished / totalAttempted) * 100) + '%';
       } else {
-        stats.successRate = '100%'; // No attempts = clean slate
+        stats.successRate = '100%'; 
       }
     });
 
