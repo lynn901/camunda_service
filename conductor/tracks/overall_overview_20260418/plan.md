@@ -11,7 +11,7 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Backend API Enhancements' (Protocol in workflow.md) 454ac23
 
 ## Phase 2: Frontend Data Layer & Routing
-- [ ] Task: Update Sidebar/Header navigation links from "Global Dashboard" to "Overall Overview" (整体概览).
+- [x] Task: Update Sidebar/Header navigation links from "Global Dashboard" to "Overall Overview" (整体概览). 3cc17fe
 - [ ] Task: Create `camundaService.getMetrics()` method to fetch data from the new backend endpoint, supporting date range parameters.
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Frontend Data Layer & Routing' (Protocol in workflow.md)
 
