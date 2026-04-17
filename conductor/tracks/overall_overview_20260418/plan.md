@@ -1,6 +1,6 @@
 # Implementation Plan: Overall Overview (整体概览) Redesign
 
-## Phase 1: Backend API Enhancements
+## Phase 1: Backend API Enhancements [checkpoint: 454ac23]
 - [x] Task: Create `MetricsDto` to hold Process Stats, Task Metrics, and System Health. 88e0998
 - [x] Task: Implement `WorkflowService.getOverallMetrics()` to aggregate data from Camunda Java API (HistoryService, ManagementService) and System Actuator. 8c2e24a
     - [ ] Write unit tests for data aggregation.
@@ -8,7 +8,7 @@
 - [x] Task: Add `GET /api/workflow/metrics` endpoint in `WorkflowController`. 3ad1818
     - [ ] Write integration test for the new endpoint.
     - [ ] Implement endpoint.
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Backend API Enhancements' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Backend API Enhancements' (Protocol in workflow.md) 454ac23
 
 ## Phase 2: Frontend Data Layer & Routing
 - [ ] Task: Update Sidebar/Header navigation links from "Global Dashboard" to "Overall Overview" (整体概览).
