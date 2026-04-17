@@ -1,8 +1,10 @@
 package com.example.workflow.controller;
 
+import com.example.workflow.dto.HistoricActivityInstanceDto;
+import com.example.workflow.dto.HistoricProcessInstanceDto;
 import com.example.workflow.service.WorkflowService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,13 +35,17 @@ import java.util.Map;
  * <li>GET /api/workflow/definitions — 查询已部署流程定义</li>
  * </ul>
  */
-@Slf4j
 @RestController
 @RequestMapping("/api/workflow")
-@RequiredArgsConstructor
 public class WorkflowController {
 
+    private static final Logger log = LoggerFactory.getLogger(WorkflowController.class);
+
     private final WorkflowService workflowService;
+
+    public WorkflowController(WorkflowService workflowService) {
+        this.workflowService = workflowService;
+    }
 
     // ─────────────────────────────────────────────────────────────
     // 流程实例
@@ -47,19 +53,6 @@ public class WorkflowController {
 
     /**
      * 发起流程实例。
-     *
-     * <p>请求体示例：
-     * <pre>{@code
-     * {
-     * "callbackUrl": "http://order-service/api/callback",
-     * "orderId": "ORD-001",
-     * "amount": 999.00
-     * }
-     * }</pre>
-     *
-     * @param processKey 流程定义 Key（BPMN 中的 process id）
-     * @param businessKey 业务主键（建议使用业务单号）
-     * @param variables 初始流程变量
      */
     @PostMapping("/start/{processKey}")
     public ResponseEntity<Map<String, Object>> startProcess(
@@ -95,163 +88,136 @@ public class WorkflowController {
     }
 
     /**
-     * 终止并删除流程实例（管理接口，生产环境建议权限管控）。
+     * 终止流程实例。
      */
     @DeleteMapping("/instance/{instanceId}")
-    public ResponseEntity<Map<String, Object>> deleteProcessInstance(
+    public ResponseEntity<Void> terminateInstance(
             @PathVariable String instanceId,
-            @RequestParam(required = false, defaultValue = "手动终止") String reason) {
-
+            @RequestParam(defaultValue = "REST_API_TERMINATE") String reason) {
         workflowService.deleteProcessInstance(instanceId, reason);
-        Map<String, Object> result = new HashMap<>();
-        result.put("processInstanceId", instanceId);
-        result.put("status", "DELETED");
-        result.put("reason", reason);
-        return ResponseEntity.ok(result);
+        return ResponseEntity.noContent().build();
     }
 
     // ─────────────────────────────────────────────────────────────
-    // 人工任务
+    // 任务操作
     // ─────────────────────────────────────────────────────────────
 
     /**
-     * 完成人工任务（User Task）。
-     *
-     * <p>
-     * 请求体示例（审批场景）：
-     * 
-     * <pre>{@code { "approved": true, "comment": "同意" }}</pre>
+     * 完成人工任务。
      */
     @PostMapping("/task/{taskId}/complete")
-    public ResponseEntity<Map<String, Object>> completeTask(
+    public ResponseEntity<Void> completeTask(
             @PathVariable String taskId,
             @RequestBody(required = false) Map<String, Object> variables) {
-
-        try {
-            workflowService.completeTask(taskId, variables);
-            Map<String, Object> result = new HashMap<>();
-            result.put("taskId", taskId);
-            result.put("status", "COMPLETED");
-            return ResponseEntity.ok(result);
-        } catch (Exception e) {
-            log.error("[WorkflowController] 完成任务失败 | taskId={} | error={}", taskId, e.getMessage());
-            Map<String, Object> error = new HashMap<>();
-            error.put("taskId", taskId);
-            error.put("error", e.getMessage());
-            return ResponseEntity.badRequest().body(error);
-        }
+        workflowService.completeTask(taskId, variables);
+        return ResponseEntity.ok().build();
     }
 
     /**
-     * 查询指定流程实例的当前待办任务。
+     * 查询实例当前的待办任务。
      */
     @GetMapping("/task/by-instance/{instanceId}")
-    public ResponseEntity<List<Map<String, Object>>> getTasksByInstance(
-            @PathVariable String instanceId) {
-
-        List<Map<String, Object>> tasks = workflowService.getTasksByProcessInstance(instanceId);
+    public ResponseEntity<List<Map<String, Object>>> getTasks(@PathVariable String instanceId) {
+        List<Map<String, Object>> tasks = workflowService.getTasksByInstanceId(instanceId);
         return ResponseEntity.ok(tasks);
     }
 
     /**
-     * 按流程定义 Key + 业务主键查询待办任务。
-     *
-     * @param processKey  流程定义 Key
-     * @param businessKey 业务主键
+     * 按 businessKey 查询待办任务。
      */
     @GetMapping("/task/by-business")
-    public ResponseEntity<List<Map<String, Object>>> getTasksByBusiness(
-            @RequestParam String processKey,
-            @RequestParam String businessKey) {
-
-        List<Map<String, Object>> tasks = workflowService.getTasksByBusinessKey(processKey, businessKey);
+    public ResponseEntity<List<Map<String, Object>>> getTasksByBusiness(@RequestParam String businessKey) {
+        List<Map<String, Object>> tasks = workflowService.getTasksByBusinessKey(businessKey);
         return ResponseEntity.ok(tasks);
     }
 
     // ─────────────────────────────────────────────────────────────
-    // 流程变量
+    // 变量与消息
     // ─────────────────────────────────────────────────────────────
 
     /**
-     * 获取流程实例的运行时变量。
+     * 获取实例变量。
      */
     @GetMapping("/instance/{instanceId}/variables")
     public ResponseEntity<Map<String, Object>> getVariables(@PathVariable String instanceId) {
-        Map<String, Object> variables = workflowService.getProcessVariables(instanceId);
-        return ResponseEntity.ok(variables);
+        Map<String, Object> vars = workflowService.getVariables(instanceId);
+        return ResponseEntity.ok(vars);
     }
 
     /**
-     * 设置单个流程变量。
-     *
-     * <p>
-     * 请求体：{@code { "variableName": "xxx", "value": "yyy" }}
+     * 设置/更新实例变量。
      */
     @PutMapping("/instance/{instanceId}/variables")
-    public ResponseEntity<Map<String, Object>> setVariable(
+    public ResponseEntity<Void> setVariables(
             @PathVariable String instanceId,
-            @RequestBody Map<String, Object> body) {
-
-        String variableName = (String) body.get("variableName");
-        Object value = body.get("value");
-        workflowService.setProcessVariable(instanceId, variableName, value);
-        Map<String, Object> result = new HashMap<>();
-        result.put("instanceId", instanceId);
-        result.put("variableName", variableName);
-        result.put("status", "UPDATED");
-        return ResponseEntity.ok(result);
+            @RequestBody Map<String, Object> variables) {
+        workflowService.setVariables(instanceId, variables);
+        return ResponseEntity.ok().build();
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // 消息 / 信号
-    // ─────────────────────────────────────────────────────────────
-
     /**
-     * 向流程实例发送消息（触发中间消息捕获事件）。
-     *
-     * <p>
-     * 适合回调确认场景：业务系统处理完成后，主动回调工作流服务告知结果。
+     * 向实例发送消息。
      */
     @PostMapping("/instance/{instanceId}/message")
-    public ResponseEntity<Map<String, Object>> sendMessage(
-            @PathVariable String instanceId,
+    public ResponseEntity<Void> sendMessage(
             @RequestParam String messageName,
+            @RequestParam String businessKey,
             @RequestBody(required = false) Map<String, Object> variables) {
-
-        workflowService.sendMessage(instanceId, messageName, variables != null ? variables : new HashMap<>());
-        Map<String, Object> result = new HashMap<>();
-        result.put("instanceId", instanceId);
-        result.put("messageName", messageName);
-        result.put("status", "MESSAGE_SENT");
-        return ResponseEntity.ok(result);
+        workflowService.sendMessage(messageName, businessKey, variables);
+        return ResponseEntity.ok().build();
     }
 
     /**
-     * 广播信号（触发全部订阅该信号的流程实例）。
+     * 广播信号。
      */
     @PostMapping("/signal/{signalName}")
-    public ResponseEntity<Map<String, Object>> broadcastSignal(
+    public ResponseEntity<Void> sendSignal(
             @PathVariable String signalName,
             @RequestBody(required = false) Map<String, Object> variables) {
-
-        workflowService.broadcastSignal(signalName, variables != null ? variables : new HashMap<>());
-        Map<String, Object> result = new HashMap<>();
-        result.put("signalName", signalName);
-        result.put("status", "SIGNAL_BROADCASTED");
-        return ResponseEntity.ok(result);
+        workflowService.sendSignal(signalName, variables);
+        return ResponseEntity.ok().build();
     }
 
     // ─────────────────────────────────────────────────────────────
-    // 查询
+    // 历史与定义
     // ─────────────────────────────────────────────────────────────
 
     /**
      * 查询历史流程实例（按 businessKey）。
+     * 
+     * @deprecated 请优先使用 {@link #getHistoryInstances(String)} 获取 DTO 列表。
      */
+    @Deprecated
     @GetMapping("/history")
     public ResponseEntity<List<Map<String, Object>>> getHistory(@RequestParam String businessKey) {
         List<Map<String, Object>> history = workflowService.getHistoricInstances(businessKey);
         return ResponseEntity.ok(history);
+    }
+
+    /**
+     * 查询历史流程实例（DTO 列表）。
+     * 
+     * @param businessKey 业务主键
+     * @return 历史实例 DTO 列表
+     */
+    @GetMapping("/history/instances")
+    public ResponseEntity<List<HistoricProcessInstanceDto>> getHistoryInstances(
+            @RequestParam(required = false) String businessKey) {
+        List<HistoricProcessInstanceDto> history = workflowService.getHistoricInstancesDto(businessKey);
+        return ResponseEntity.ok(history);
+    }
+
+    /**
+     * 查询历史活动实例（用于可视化路径）。
+     * 
+     * @param instanceId 流程实例 ID
+     * @return 历史活动 DTO 列表
+     */
+    @GetMapping("/history/instances/{instanceId}/activities")
+    public ResponseEntity<List<HistoricActivityInstanceDto>> getHistoryActivities(
+            @PathVariable String instanceId) {
+        List<HistoricActivityInstanceDto> activities = workflowService.getHistoricActivitiesDto(instanceId);
+        return ResponseEntity.ok(activities);
     }
 
     /**

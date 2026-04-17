@@ -114,11 +114,18 @@ export interface ExternalTask {
 }
 
 const ENGINE_REST_URL = '/engine-rest';
+const API_BASE_URL = '/api/workflow';
 
 export const camundaService = {
   async getProcessDefinitions(): Promise<ProcessDefinition[]> {
     const response = await fetch(`${ENGINE_REST_URL}/process-definition?latestVersion=true`);
     if (!response.ok) throw new Error('Failed to fetch process definitions');
+    return response.json();
+  },
+
+  async getProcessDefinitionXml(id: string): Promise<{ bpmn20Xml: string }> {
+    const response = await fetch(`${ENGINE_REST_URL}/process-definition/${id}/xml`);
+    if (!response.ok) throw new Error('Failed to fetch process definition XML');
     return response.json();
   },
 
@@ -270,6 +277,21 @@ export const camundaService = {
       method: 'POST',
     });
     if (!response.ok) throw new Error('Failed to unlock external task');
+  },
+
+  async getHistoricInstances(businessKey?: string): Promise<ProcessInstance[]> {
+    const url = businessKey 
+      ? `${API_BASE_URL}/history/instances?businessKey=${businessKey}`
+      : `${API_BASE_URL}/history/instances`;
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Failed to fetch historic instances');
+    return response.json();
+  },
+
+  async getHistoricActivities(instanceId: string): Promise<HistoricActivityInstance[]> {
+    const response = await fetch(`${API_BASE_URL}/history/instances/${instanceId}/activities`);
+    if (!response.ok) throw new Error('Failed to fetch historic activities');
+    return response.json();
   },
 
   async getStatistics() {

@@ -1,15 +1,19 @@
 package com.example.workflow.service;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import com.example.workflow.dto.HistoricActivityInstanceDto;
+import com.example.workflow.dto.HistoricProcessInstanceDto;
 import org.camunda.bpm.engine.HistoryService;
 import org.camunda.bpm.engine.RepositoryService;
 import org.camunda.bpm.engine.RuntimeService;
 import org.camunda.bpm.engine.TaskService;
+import org.camunda.bpm.engine.history.HistoricActivityInstance;
 import org.camunda.bpm.engine.history.HistoricProcessInstance;
+import org.camunda.bpm.engine.history.HistoricProcessInstanceQuery;
 import org.camunda.bpm.engine.repository.ProcessDefinition;
 import org.camunda.bpm.engine.runtime.ProcessInstance;
 import org.camunda.bpm.engine.task.Task;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -27,15 +31,25 @@ import java.util.stream.Collectors;
  * <p>
  * <b>设计原则：</b>此 Service 仅做引擎操作，不含任何业务逻辑。
  */
-@Slf4j
 @Service
-@RequiredArgsConstructor
 public class WorkflowService {
+
+    private static final Logger log = LoggerFactory.getLogger(WorkflowService.class);
 
     private final RuntimeService runtimeService;
     private final TaskService taskService;
     private final HistoryService historyService;
     private final RepositoryService repositoryService;
+
+    public WorkflowService(RuntimeService runtimeService, 
+                          TaskService taskService, 
+                          HistoryService historyService, 
+                          RepositoryService repositoryService) {
+        this.runtimeService = runtimeService;
+        this.taskService = taskService;
+        this.historyService = historyService;
+        this.repositoryService = repositoryService;
+    }
 
     // ─────────────────────────────────────────────────────────────
     // 流程实例管理
@@ -86,18 +100,18 @@ public class WorkflowService {
      */
     public void deleteProcessInstance(String processInstanceId, String reason) {
         runtimeService.deleteProcessInstance(processInstanceId, reason);
-        log.warn("[WorkflowService] 流程实例已删除 | instanceId={} | reason={}", processInstanceId, reason);
+        log.info("[WorkflowService] 流程已终止 | instanceId={} | reason={}", processInstanceId, reason);
     }
 
     // ─────────────────────────────────────────────────────────────
-    // 人工任务（User Task）操作
+    // 任务操作
     // ─────────────────────────────────────────────────────────────
 
     /**
-     * 完成人工任务。
+     * 完成一个人工任务。
      *
-     * @param taskId    任务 ID（通过查询获取）
-     * @param variables 任务完成时携带的输出变量（如审批结果）
+     * @param taskId    Camunda 内部任务 ID
+     * @param variables 完成任务时设置的流程变量（可选）
      */
     public void completeTask(String taskId, Map<String, Object> variables) {
         taskService.complete(taskId, variables);
@@ -105,107 +119,85 @@ public class WorkflowService {
     }
 
     /**
-     * 查询指定流程实例的当前待办任务。
-     *
-     * @param processInstanceId 流程实例 ID
-     * @return 任务列表（含任务 ID、名称、受理人等）
-     */
-    public List<Map<String, Object>> getTasksByProcessInstance(String processInstanceId) {
-        List<Task> tasks = taskService.createTaskQuery()
-                .processInstanceId(processInstanceId)
-                .list();
-        return tasks.stream()
-                .map(t -> {
-                    Map<String, Object> dto = new HashMap<>();
-                    dto.put("taskId", t.getId());
-                    dto.put("taskName", t.getName());
-                    dto.put("assignee", t.getAssignee());
-                    dto.put("created", t.getCreateTime());
-                    dto.put("dueDate", t.getDueDate());
-                    dto.put("processInstanceId", t.getProcessInstanceId());
-                    return dto;
-                })
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * 按 businessKey 查询待办任务。
-     *
-     * @param processDefinitionKey 流程定义 Key
-     * @param businessKey          业务主键
-     * @return 任务列表
-     */
-    public List<Map<String, Object>> getTasksByBusinessKey(String processDefinitionKey,
-            String businessKey) {
-        List<Task> tasks = taskService.createTaskQuery()
-                .processDefinitionKey(processDefinitionKey)
-                .processInstanceBusinessKey(businessKey)
-                .list();
-        return tasks.stream()
-                .map(t -> {
-                    Map<String, Object> dto = new HashMap<>();
-                    dto.put("taskId", t.getId());
-                    dto.put("taskName", t.getName());
-                    dto.put("assignee", t.getAssignee());
-                    dto.put("created", t.getCreateTime());
-                    dto.put("processInstanceId", t.getProcessInstanceId());
-                    return dto;
-                })
-                .collect(Collectors.toList());
-    }
-
-    // ─────────────────────────────────────────────────────────────
-    // 流程变量操作
-    // ─────────────────────────────────────────────────────────────
-
-    /**
-     * 获取流程实例的所有运行时变量。
+     * 获取指定实例的所有待办任务。
      *
      * @param processInstanceId 实例 ID
-     * @return 变量 Map
+     * @return 任务列表
      */
-    public Map<String, Object> getProcessVariables(String processInstanceId) {
+    public List<Map<String, Object>> getTasksByInstanceId(String processInstanceId) {
+        List<Task> tasks = taskService.createTaskQuery().processInstanceId(processInstanceId).list();
+        return tasks.stream()
+                .map(t -> {
+                    Map<String, Object> dto = new HashMap<>();
+                    dto.put("id", t.getId());
+                    dto.put("name", t.getName());
+                    dto.put("assignee", t.getAssignee());
+                    dto.put("createTime", t.getCreateTime());
+                    dto.put("taskDefinitionKey", t.getTaskDefinitionKey());
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 按业务主键获取待办任务（常用于业务系统查询单据当前状态）。
+     *
+     * @param businessKey 业务单号
+     * @return 任务列表
+     */
+    public List<Map<String, Object>> getTasksByBusinessKey(String businessKey) {
+        List<Task> tasks = taskService.createTaskQuery().processInstanceBusinessKey(businessKey).list();
+        return tasks.stream()
+                .map(t -> {
+                    Map<String, Object> dto = new HashMap<>();
+                    dto.put("id", t.getId());
+                    dto.put("name", t.getName());
+                    dto.put("processInstanceId", t.getProcessInstanceId());
+                    dto.put("createTime", t.getCreateTime());
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // 流程变量与消息
+    // ─────────────────────────────────────────────────────────────
+
+    /**
+     * 获取流程实例的所有变量。
+     */
+    public Map<String, Object> getVariables(String processInstanceId) {
         return runtimeService.getVariables(processInstanceId);
     }
 
     /**
-     * 设置单个流程变量。
-     *
-     * @param processInstanceId 实例 ID
-     * @param variableName      变量名
-     * @param value             变量值
+     * 设置流程变量（覆盖或新增）。
      */
-    public void setProcessVariable(String processInstanceId, String variableName, Object value) {
-        runtimeService.setVariable(processInstanceId, variableName, value);
-        log.debug("[WorkflowService] 设置流程变量 | instanceId={} | {}={}", processInstanceId, variableName, value);
+    public void setVariables(String processInstanceId, Map<String, Object> variables) {
+        runtimeService.setVariables(processInstanceId, variables);
+        log.info("[WorkflowService] 变量已更新 | instanceId={} | count={}",
+                processInstanceId, (variables != null ? variables.size() : 0));
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // 消息 / 信号
-    // ─────────────────────────────────────────────────────────────
-
     /**
-     * 向指定流程实例发送消息（用于触发中间捕获消息事件，如回调确认）。
+     * 向正在运行的实例发送消息。
      *
-     * @param processInstanceId 实例 ID
-     * @param messageName       消息名称
-     * @param variables         消息携带的变量
+     * @param messageName 消息名
+     * @param businessKey 业务主键（定位实例）
+     * @param variables   随消息传递的变量
      */
-    public void sendMessage(String processInstanceId, String messageName, Map<String, Object> variables) {
+    public void sendMessage(String messageName, String businessKey, Map<String, Object> variables) {
         runtimeService.createMessageCorrelation(messageName)
-                .processInstanceId(processInstanceId)
+                .processInstanceBusinessKey(businessKey)
                 .setVariables(variables)
                 .correlate();
-        log.info("[WorkflowService] 消息已发送 | instanceId={} | message={}", processInstanceId, messageName);
+        log.info("[WorkflowService] 消息已发送 | message={} | businessKey={}", messageName, businessKey);
     }
 
     /**
-     * 广播信号（触发所有订阅该信号的流程实例）。
-     *
-     * @param signalName 信号名称
-     * @param variables  信号携带的变量
+     * 发送广播信号。
      */
-    public void broadcastSignal(String signalName, Map<String, Object> variables) {
+    public void sendSignal(String signalName, Map<String, Object> variables) {
         runtimeService.signalEventReceived(signalName, variables);
         log.info("[WorkflowService] 信号已广播 | signal={}", signalName);
     }
@@ -215,10 +207,7 @@ public class WorkflowService {
     // ─────────────────────────────────────────────────────────────
 
     /**
-     * 查询历史流程实例（已完成/终止的实例）。
-     *
-     * @param businessKey 业务主键
-     * @return 历史实例信息
+     * 按 businessKey 查询历史实例记录。
      */
     public List<Map<String, Object>> getHistoricInstances(String businessKey) {
         List<HistoricProcessInstance> list = historyService.createHistoricProcessInstanceQuery()
@@ -237,6 +226,54 @@ public class WorkflowService {
                     dto.put("durationInMillis", h.getDurationInMillis());
                     return dto;
                 })
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 查询历史流程实例（DTO 版本）。
+     *
+     * @param businessKey 业务主键
+     * @return 历史实例 DTO 列表
+     */
+    public List<HistoricProcessInstanceDto> getHistoricInstancesDto(String businessKey) {
+        HistoricProcessInstanceQuery query = historyService.createHistoricProcessInstanceQuery();
+        if (businessKey != null && !businessKey.isEmpty()) {
+            query.processInstanceBusinessKey(businessKey);
+        }
+        List<HistoricProcessInstance> list = query.orderByProcessInstanceEndTime().desc().list();
+        return list.stream()
+                .map(h -> HistoricProcessInstanceDto.builder()
+                        .instanceId(h.getId())
+                        .processDefinitionKey(h.getProcessDefinitionKey())
+                        .businessKey(h.getBusinessKey())
+                        .startTime(h.getStartTime())
+                        .endTime(h.getEndTime())
+                        .state(h.getState())
+                        .durationInMillis(h.getDurationInMillis())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 查询历史活动实例（用于可视化路径）。
+     *
+     * @param processInstanceId 流程实例 ID
+     * @return 历史活动 DTO 列表
+     */
+    public List<HistoricActivityInstanceDto> getHistoricActivitiesDto(String processInstanceId) {
+        List<HistoricActivityInstance> list = historyService.createHistoricActivityInstanceQuery()
+                .processInstanceId(processInstanceId)
+                .orderByHistoricActivityInstanceStartTime().asc()
+                .list();
+        return list.stream()
+                .map(a -> HistoricActivityInstanceDto.builder()
+                        .activityId(a.getActivityId())
+                        .activityName(a.getActivityName())
+                        .activityType(a.getActivityType())
+                        .startTime(a.getStartTime())
+                        .endTime(a.getEndTime())
+                        .durationInMillis(a.getDurationInMillis())
+                        .build())
                 .collect(Collectors.toList());
     }
 

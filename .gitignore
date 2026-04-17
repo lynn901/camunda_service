@@ -33,6 +33,3 @@ target/
 ### Logs ###
 *.log
 logs/
-
-### conductor ###
-conductor/

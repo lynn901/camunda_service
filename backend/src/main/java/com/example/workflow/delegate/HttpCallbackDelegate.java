@@ -1,10 +1,10 @@
 package com.example.workflow.delegate;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -40,12 +40,16 @@ import java.util.Map;
  * <li>业务系统明确返回失败 → 抛出 {@link BpmnError} 触发 BPMN 错误边界事件流转。</li>
  * </ul>
  */
-@Slf4j
 @Component("httpCallbackDelegate")
-@RequiredArgsConstructor
 public class HttpCallbackDelegate implements JavaDelegate {
 
+    private static final Logger log = LoggerFactory.getLogger(HttpCallbackDelegate.class);
+
     private final RestTemplate restTemplate;
+
+    public HttpCallbackDelegate(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
 
     @Override
     public void execute(DelegateExecution execution) throws Exception {
@@ -53,51 +57,45 @@ public class HttpCallbackDelegate implements JavaDelegate {
 
         if (callbackUrl == null || callbackUrl.isBlank()) {
             throw new IllegalArgumentException(
-                    "[HttpCallbackDelegate] 流程变量 'callbackUrl' 未设置，节点: "
-                            + execution.getCurrentActivityId());
+                    "[HttpCallbackDelegate] 流程变量 'callbackUrl' 未设置，节点: " 
+                    + execution.getCurrentActivityName());
         }
 
-        // ── 1. 构造请求体 ────────────────────────────────────────────
-        Map<String, Object> payload = new HashMap<>();
-        payload.put("processInstanceId", execution.getProcessInstanceId());
-        payload.put("processDefinitionKey", execution.getProcessDefinitionId());
-        payload.put("businessKey", execution.getProcessBusinessKey());
-        payload.put("activityId", execution.getCurrentActivityId());
-        payload.put("activityName", execution.getCurrentActivityName());
-        payload.put("variables", execution.getVariables());
+        log.info("[HttpCallbackDelegate] 发起回调 | instanceId={} | activity={} | url={}",
+                execution.getProcessInstanceId(), execution.getCurrentActivityName(), callbackUrl);
 
+        // 构建请求头
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        // 可按需添加认证头：headers.setBearerAuth(token);
-        HttpEntity<Map<String, Object>> request = new HttpEntity<>(payload, headers);
 
-        log.info("[Workflow Callback] → {} | processInstance={} | businessKey={}",
-                callbackUrl,
-                execution.getProcessInstanceId(),
-                execution.getProcessBusinessKey());
+        // 构建请求体（包含当前所有流程变量）
+        Map<String, Object> body = new HashMap<>(execution.getVariables());
+        body.put("executionId", execution.getId());
+        body.put("processInstanceId", execution.getProcessInstanceId());
+        body.put("activityId", execution.getCurrentActivityId());
 
-        // ── 2. 发起 HTTP POST ────────────────────────────────────────
+        HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
+
         try {
-            ResponseEntity<String> response = restTemplate.postForEntity(callbackUrl, request, String.class);
-
-            if (!response.getStatusCode().is2xxSuccessful()) {
-                throw new RuntimeException(
-                        "[HttpCallbackDelegate] 回调失败, HTTP " + response.getStatusCode()
-                                + ", url=" + callbackUrl);
+            ResponseEntity<Map> response = restTemplate.postForEntity(callbackUrl, request, Map.class);
+            
+            if (response.getStatusCode().is2xxSuccessful()) {
+                log.info("[HttpCallbackDelegate] 回调成功 | status={}", response.getStatusCode());
+                
+                // 如果业务系统返回了变量，同步更新到引擎
+                if (response.getBody() != null) {
+                    execution.setVariables(response.getBody());
+                }
+            } else {
+                log.error("[HttpCallbackDelegate] 回调业务失败 | status={} | body={}", 
+                        response.getStatusCode(), response.getBody());
+                // 抛出 BPMN Error，允许流程图中通过 Error Boundary Event 捕获
+                throw new BpmnError("CALLBACK_BUSINESS_FAILURE", "业务系统返回错误状态码: " + response.getStatusCode());
             }
-
-            log.info("[Workflow Callback] ✓ 回调成功, statusCode={}, body={}",
-                    response.getStatusCode(), response.getBody());
-
-            // 可选：将业务系统返回内容写回流程变量，供后续节点判断
-            // execution.setVariable("callbackResponse", response.getBody());
-
-        } catch (RuntimeException e) {
-            // 若希望触发 BPMN Error 事件，改为：throw new BpmnError("CALLBACK_FAILED",
-            // e.getMessage());
-            // 若希望让 Camunda 自动重试（依赖 Job Executor），直接重新抛出：
-            log.error("[Workflow Callback] ✗ 回调异常: {}", e.getMessage(), e);
-            throw new RuntimeException("[HttpCallbackDelegate] HTTP 回调执行失败: " + e.getMessage(), e);
+        } catch (Exception e) {
+            log.error("[HttpCallbackDelegate] HTTP 请求异常 | error={}", e.getMessage());
+            // 抛出普通异常，触发 Camunda 重试机制 (Job Executor Retries)
+            throw e;
         }
     }
 }
