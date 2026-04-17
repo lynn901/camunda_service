@@ -2,7 +2,10 @@ package com.example.workflow.service;
 
 import com.example.workflow.dto.HistoricActivityInstanceDto;
 import com.example.workflow.dto.HistoricProcessInstanceDto;
+import com.example.workflow.dto.MetricsDto;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.camunda.bpm.engine.HistoryService;
+import org.camunda.bpm.engine.ManagementService;
 import org.camunda.bpm.engine.RepositoryService;
 import org.camunda.bpm.engine.RuntimeService;
 import org.camunda.bpm.engine.TaskService;
@@ -16,6 +19,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.OperatingSystemMXBean;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,15 +45,75 @@ public class WorkflowService {
     private final TaskService taskService;
     private final HistoryService historyService;
     private final RepositoryService repositoryService;
+    private final ManagementService managementService;
+    private final MeterRegistry meterRegistry;
 
     public WorkflowService(RuntimeService runtimeService, 
                           TaskService taskService, 
                           HistoryService historyService, 
-                          RepositoryService repositoryService) {
+                          RepositoryService repositoryService,
+                          ManagementService managementService,
+                          MeterRegistry meterRegistry) {
         this.runtimeService = runtimeService;
         this.taskService = taskService;
         this.historyService = historyService;
         this.repositoryService = repositoryService;
+        this.managementService = managementService;
+        this.meterRegistry = meterRegistry;
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // 指标统计 (Overall Overview)
+    // ─────────────────────────────────────────────────────────────
+
+    /**
+     * 获取全站概览指标。
+     */
+    public MetricsDto getOverallMetrics() {
+        MetricsDto dto = new MetricsDto();
+
+        // 1. Process Stats
+        MetricsDto.ProcessStats processStats = new MetricsDto.ProcessStats();
+        processStats.setTotalInstances(historyService.createHistoricProcessInstanceQuery().count());
+        processStats.setRunningInstances(runtimeService.createProcessInstanceQuery().count());
+        processStats.setCompletedInstances(historyService.createHistoricProcessInstanceQuery().finished().count());
+        processStats.setSuspendedInstances(runtimeService.createProcessInstanceQuery().suspended().count());
+        dto.setProcessStats(processStats);
+
+        // 2. Task Metrics
+        MetricsDto.TaskMetrics taskMetrics = new MetricsDto.TaskMetrics();
+        taskMetrics.setTaskBacklogs(taskService.createTaskQuery().count());
+        
+        // 简单计算平均耗时（此处仅为示例，大型生产环境建议使用专门的分析表或 Prometheus）
+        List<HistoricProcessInstance> finished = historyService.createHistoricProcessInstanceQuery()
+                .finished()
+                .listPage(0, 100); // 采样最近 100 条
+        double avgTime = finished.stream()
+                .mapToLong(HistoricProcessInstance::getDurationInMillis)
+                .average()
+                .orElse(0.0);
+        taskMetrics.setAvgCompletionTime(avgTime);
+        
+        long total = processStats.getTotalInstances();
+        long incidents = runtimeService.createIncidentQuery().count();
+        taskMetrics.setFailureRate(total > 0 ? (double) incidents / total : 0.0);
+        dto.setTaskMetrics(taskMetrics);
+
+        // 3. System Health (基于 Micrometer 和 JVM MXBean)
+        MetricsDto.SystemHealth systemHealth = new MetricsDto.SystemHealth();
+        OperatingSystemMXBean osBean = ManagementFactory.getOperatingSystemMXBean();
+        systemHealth.setCpuUsage(osBean.getSystemLoadAverage()); // 注意：Windows 下可能返回 -1
+        
+        Runtime runtime = Runtime.getRuntime();
+        systemHealth.setMemoryUsage((runtime.totalMemory() - runtime.freeMemory()) / (1024 * 1024)); // MB
+        
+        // 获取数据库连接数（如果能从 MeterRegistry 获取）
+        double activeConns = meterRegistry.find("jdbc.connections.active").gauge() != null ?
+                meterRegistry.find("jdbc.connections.active").gauge().value() : 0.0;
+        systemHealth.setDbConnections((long) activeConns);
+        dto.setSystemHealth(systemHealth);
+
+        return dto;
     }
 
     // ─────────────────────────────────────────────────────────────

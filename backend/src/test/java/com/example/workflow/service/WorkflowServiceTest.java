@@ -1,7 +1,9 @@
 package com.example.workflow.service;
 
 import com.example.workflow.dto.HistoricProcessInstanceDto;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.camunda.bpm.engine.HistoryService;
+import org.camunda.bpm.engine.ManagementService;
 import org.camunda.bpm.engine.RepositoryService;
 import org.camunda.bpm.engine.RuntimeService;
 import org.camunda.bpm.engine.TaskService;
@@ -33,7 +35,11 @@ class WorkflowServiceTest {
     @Mock
     private HistoryService historyService;
     @Mock
+    private ManagementService managementService;
+    @Mock
     private RepositoryService repositoryService;
+    @Mock
+    private MeterRegistry meterRegistry;
 
     @InjectMocks
     private WorkflowService workflowService;
