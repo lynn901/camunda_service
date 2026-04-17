@@ -7,7 +7,7 @@ export const Header: React.FC = () => {
       <div className="flex items-center gap-3">
         <Terminal className="text-stone-gray w-4 h-4" />
         <span className="text-[10px] text-stone-gray uppercase tracking-widest font-sans font-medium">/ 运维控制台 (OpsConsole) /</span>
-        <h2 className="text-sm font-sans font-bold text-anthropic-black">系统概览</h2>
+        <h2 className="text-sm font-sans font-bold text-anthropic-black">整体概览</h2>
       </div>
       
       <div className="flex items-center gap-6">

@@ -4,7 +4,7 @@ import { LayoutDashboard, GitBranch, Activity, Clock, Server, Zap } from 'lucide
 
 export const Sidebar: React.FC = () => {
   const navItems = [
-    { name: '全局大盘', path: '/', icon: LayoutDashboard },
+    { name: '整体概览', path: '/', icon: LayoutDashboard },
     { name: '模型库', path: '/models', icon: GitBranch },
     { name: '实例干预', path: '/instances', icon: Activity },
     { name: '执行历史', path: '/history', icon: Clock },
