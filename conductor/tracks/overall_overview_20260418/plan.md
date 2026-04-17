@@ -15,10 +15,10 @@
 - [x] Task: Create `camundaService.getMetrics()` method to fetch data from the new backend endpoint, supporting date range parameters. f5c5667
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Frontend Data Layer & Routing' (Protocol in workflow.md) 771867e
 
-## Phase 3: Frontend UI Components (Widget Grid)
+## Phase 3: Frontend UI Components (Widget Grid) [checkpoint: eac87e4]
 - [x] Task: Design and implement the flexible Widget Grid container component. a5fdaa2
 - [x] Task: Create individual Metric Card components (Process Stats, Task Metrics, System Health) displaying the fetched data. 41c0c5f
     - [x] Add Drill-down Links to relevant cards. 41c0c5f
 - [x] Task: Implement Date Filtering controls and Auto-Refresh toggle/interval selector on the Overview page. a15b203
 - [x] Task: Integrate components into the main `Dashboard.tsx` (Overall Overview) page. a15b203
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Frontend UI Components (Widget Grid)' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Frontend UI Components (Widget Grid)' (Protocol in workflow.md) eac87e4
