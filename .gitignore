@@ -21,7 +21,6 @@ target/
 
 ### VS Code ###
 .vscode/
-
 ### macOS ###
 .DS_Store
 .AppleDouble
@@ -34,3 +33,6 @@ target/
 ### Logs ###
 *.log
 logs/
+
+### conductor ###
+conductor/
