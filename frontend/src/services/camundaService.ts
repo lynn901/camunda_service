@@ -31,7 +31,7 @@ export interface ProcessInstance {
   ended: boolean;
   suspended: boolean;
   tenantId: string | null;
-  state?: 'Running' | 'Failed' | 'Suspended' | 'Completed';
+  state?: 'Running' | 'Failed' | 'Suspended' | 'ACTIVE' | 'SUSPENDED' | 'COMPLETED' | 'EXTERNALLY_TERMINATED' | 'INTERNALLY_TERMINATED';
   startTime?: string;
 }
 
@@ -124,7 +124,12 @@ export const camundaService = {
   },
 
   async getProcessDefinitionXml(id: string): Promise<{ bpmn20Xml: string }> {
-    const response = await fetch(`${ENGINE_REST_URL}/process-definition/${id}/xml`);
+    // Check if id is a versioned ID (contains ':') or a key
+    const url = id.includes(':') 
+      ? `${ENGINE_REST_URL}/process-definition/${id}/xml`
+      : `${ENGINE_REST_URL}/process-definition/key/${id}/xml`;
+      
+    const response = await fetch(url);
     if (!response.ok) throw new Error('Failed to fetch process definition XML');
     return response.json();
   },
@@ -285,13 +290,51 @@ export const camundaService = {
       : `${API_BASE_URL}/history/instances`;
     const response = await fetch(url);
     if (!response.ok) throw new Error('Failed to fetch historic instances');
-    return response.json();
+    const data = await response.json();
+    
+    // Map backend DTO to frontend ProcessInstance interface
+    return data.map((item: any) => ({
+      id: item.instanceId,
+      definitionId: item.processDefinitionKey,
+      businessKey: item.businessKey,
+      startTime: item.startTime,
+      endTime: item.endTime,
+      state: item.state,
+      ended: !!item.endTime,
+      suspended: item.state === 'SUSPENDED',
+      caseInstanceId: null,
+      tenantId: null
+    }));
   },
 
   async getHistoricActivities(instanceId: string): Promise<HistoricActivityInstance[]> {
     const response = await fetch(`${API_BASE_URL}/history/instances/${instanceId}/activities`);
     if (!response.ok) throw new Error('Failed to fetch historic activities');
-    return response.json();
+    const data = await response.json();
+    
+    // Map backend DTO to frontend HistoricActivityInstance interface
+    return data.map((item: any, index: number) => ({
+      id: `${item.activityId}-${index}`, // Unique key for rendering
+      activityId: item.activityId,
+      activityName: item.activityName,
+      activityType: item.activityType,
+      startTime: item.startTime,
+      endTime: item.endTime,
+      durationInMillis: item.durationInMillis,
+      // Fill in mandatory interface fields even if not provided by DTO
+      parentActivityInstanceId: '',
+      processDefinitionKey: '',
+      processDefinitionId: '',
+      processInstanceId: instanceId,
+      executionId: '',
+      taskId: null,
+      calledProcessInstanceId: null,
+      calledCaseInstanceId: null,
+      assignee: null,
+      canceled: false,
+      completeScope: false,
+      tenantId: null
+    }));
   },
 
   async getStatistics() {

@@ -82,7 +82,7 @@ export const History: React.FC = () => {
   };
 
   const getDefinitionName = (defId: string) => {
-    return definitions.find(d => d.id === defId)?.name || defId.split(':')[0];
+    return definitions.find(d => d.id === defId || d.key === defId)?.name || defId.split(':')[0];
   };
 
   return (

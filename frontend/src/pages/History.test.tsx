@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { History } from './History';
 import { camundaService } from '../services/camundaService';
-import React from 'react';
 
 vi.mock('../services/camundaService', () => ({
   camundaService: {
