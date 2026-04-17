@@ -1,0 +1,97 @@
+:root {
+  /* Colors - Sanity Inspired */
+  --color-black: #0b0b0b;
+  --color-gray-900: #212121;
+  --color-gray-800: #353535;
+  --color-gray-700: #797979;
+  --color-gray-500: #b9b9b9;
+  --color-gray-200: #ededed;
+  --color-white: #ffffff;
+  
+  --color-red: #f36458;
+  --color-blue: #0052ef;
+  --color-green: #19d600;
+
+  /* Semantic */
+  --bg-canvas: var(--color-black);
+  --bg-surface: var(--color-gray-900);
+  --border-subtle: var(--color-gray-900);
+  --border-visible: var(--color-gray-800);
+  
+  --text-primary: var(--color-white);
+  --text-secondary: var(--color-gray-500);
+  --text-tertiary: var(--color-gray-700);
+  
+  --cta-primary: var(--color-red);
+  --interactive: var(--color-blue);
+
+  /* Spacing */
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --space-6: 48px;
+  --space-8: 64px;
+  --space-12: 120px;
+
+  /* Typography */
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-canvas);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+}
+
+.pill-button {
+  border-radius: 9999px;
+  padding: 8px 16px;
+  background-color: var(--cta-primary);
+  color: var(--color-white);
+  font-size: 16px;
+  transition: background-color 0.2s;
+}
+
+.pill-button:hover {
+  background-color: var(--interactive);
+}
+
+.secondary-button {
+  border-radius: 9999px;
+  padding: 8px 16px;
+  background-color: var(--bg-surface);
+  color: var(--text-secondary);
+  font-size: 16px;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.secondary-button:hover {
+  background-color: var(--interactive);
+  color: var(--color-white);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}

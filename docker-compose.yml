@@ -43,7 +43,7 @@ services:
   # ── 2. Camunda 工作流引擎 ──────────────────────────────────────
   camunda-workflow:
     build:
-      context: .
+      context: ./backend
       dockerfile: Dockerfile
     container_name: camunda-workflow-server
     restart: unless-stopped

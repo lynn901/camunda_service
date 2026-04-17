@@ -1,27 +1,15 @@
-# ====== Build Stage ======
-FROM node:20-slim AS build-stage
+# Stage 1: Build
+FROM node:20-alpine AS build
+
 WORKDIR /app
-
-# Enable pnpm if needed, but here we use npm for simplicity as per existing package.json
-# Using corepack to enable pnpm if it's preferred
-# RUN corepack enable && corepack prepare pnpm@latest --activate
-
-COPY package.json package-lock.json* ./
-RUN npm install --legacy-peer-deps
-
+COPY package*.json ./
+RUN npm install
 COPY . .
 RUN npm run build
 
-# ====== Run Stage ======
-FROM nginx:stable-alpine
-
-# Copy the build output to Nginx's default public directory
-# Ant Design Pro/Umi builds to 'dist' by default
-COPY --from=build-stage /app/dist /usr/share/nginx/html
-
-# Copy custom Nginx configuration to handle SPA routing
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-
+# Stage 2: Serve
+FROM nginx:alpine
+COPY --from=build /app/dist /usr/share/nginx/html
+# COPY nginx.conf /etc/nginx/conf.d/default.conf # Optional: Custom nginx config
 EXPOSE 80
-
 CMD ["nginx", "-g", "daemon off;"]

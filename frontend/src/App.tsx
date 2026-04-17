@@ -1,165 +1,136 @@
-import { LinkOutlined } from '@ant-design/icons';
-import type { Settings as LayoutSettings } from '@ant-design/pro-components';
-import { SettingDrawer } from '@ant-design/pro-components';
-import type { RequestConfig, RunTimeLayoutConfig } from '@umijs/max';
-import { history, Link } from '@umijs/max';
-import React from 'react';
-import {
-  AvatarDropdown,
-  AvatarName,
-  Footer,
-  Question,
-  SelectLang,
-} from '@/components';
-import { currentUser as queryCurrentUser } from '@/services/ant-design-pro/api';
-import defaultSettings from '../config/defaultSettings';
-import { errorConfig } from './requestErrorConfig';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { LayoutDashboard, ListTodo, GitFork, Settings } from 'lucide-react';
 
-const isDev = process.env.NODE_ENV === 'development';
-const isDevOrTest = isDev || process.env.CI;
-const loginPath = '/user/login';
+const Dashboard = () => (
+  <div style={{ padding: 'var(--space-4)' }}>
+    <h1 style={{ fontSize: '38px', marginBottom: 'var(--space-4)' }}>Engine Overview</h1>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 'var(--space-3)' }}>
+      <div className="card" style={{ background: 'var(--bg-surface)', padding: 'var(--space-3)', borderRadius: '6px', border: '1px solid var(--border-visible)' }}>
+        <h3 style={{ color: 'var(--text-secondary)', fontSize: '13px', textTransform: 'uppercase', marginBottom: 'var(--space-1)' }}>Process Instances</h3>
+        <p style={{ fontSize: '32px' }}>24</p>
+      </div>
+      <div className="card" style={{ background: 'var(--bg-surface)', padding: 'var(--space-3)', borderRadius: '6px', border: '1px solid var(--border-visible)' }}>
+        <h3 style={{ color: 'var(--text-secondary)', fontSize: '13px', textTransform: 'uppercase', marginBottom: 'var(--space-1)' }}>Active Tasks</h3>
+        <p style={{ fontSize: '32px' }}>12</p>
+      </div>
+      <div className="card" style={{ background: 'var(--bg-surface)', padding: 'var(--space-3)', borderRadius: '6px', border: '1px solid var(--border-visible)' }}>
+        <h3 style={{ color: 'var(--text-secondary)', fontSize: '13px', textTransform: 'uppercase', marginBottom: 'var(--space-1)' }}>Incidents</h3>
+        <p style={{ fontSize: '32px', color: 'var(--color-red)' }}>0</p>
+      </div>
+    </div>
+  </div>
+);
 
-/**
- * @see https://umijs.org/docs/api/runtime-config#getinitialstate
- * */
-export async function getInitialState(): Promise<{
-  settings?: Partial<LayoutSettings>;
-  currentUser?: API.CurrentUser;
-  loading?: boolean;
-  fetchUserInfo?: () => Promise<API.CurrentUser | undefined>;
-}> {
-  const fetchUserInfo = async () => {
-    try {
-      const msg = await queryCurrentUser({
-        skipErrorHandler: true,
-      });
-      return msg.data;
-    } catch (_error) {
-      history.push(loginPath);
-    }
-    return undefined;
-  };
-  // 如果不是登录页面，执行
-  const { location } = history;
-  if (
-    ![loginPath, '/user/register', '/user/register-result'].includes(
-      location.pathname,
-    )
-  ) {
-    const currentUser = await fetchUserInfo();
-    return {
-      fetchUserInfo,
-      currentUser,
-      settings: defaultSettings as Partial<LayoutSettings>,
-    };
-  }
-  return {
-    fetchUserInfo,
-    settings: defaultSettings as Partial<LayoutSettings>,
-  };
+const Tasks = () => (
+  <div style={{ padding: 'var(--space-4)' }}>
+    <h1 style={{ fontSize: '38px', marginBottom: 'var(--space-4)' }}>Pending Tasks</h1>
+    <div style={{ background: 'var(--bg-surface)', borderRadius: '6px', border: '1px solid var(--border-visible)' }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <thead>
+          <tr style={{ borderBottom: '1px solid var(--border-visible)', textAlign: 'left' }}>
+            <th style={{ padding: 'var(--space-2)', color: 'var(--text-secondary)', fontWeight: '400', fontSize: '13px' }}>ID</th>
+            <th style={{ padding: 'var(--space-2)', color: 'var(--text-secondary)', fontWeight: '400', fontSize: '13px' }}>NAME</th>
+            <th style={{ padding: 'var(--space-2)', color: 'var(--text-secondary)', fontWeight: '400', fontSize: '13px' }}>ASSIGNEE</th>
+            <th style={{ padding: 'var(--space-2)', color: 'var(--text-secondary)', fontWeight: '400', fontSize: '13px' }}>CREATED</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td colSpan={4} style={{ padding: 'var(--space-4)', textAlign: 'center', color: 'var(--text-tertiary)' }}>No pending tasks found</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+);
+
+function App() {
+  return (
+    <Router>
+      <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-canvas)' }}>
+        {/* Sidebar */}
+        <nav style={{ 
+          width: '240px', 
+          borderRight: '1px solid var(--border-visible)', 
+          padding: 'var(--space-3)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 'var(--space-1)'
+        }}>
+          <div style={{ marginBottom: 'var(--space-4)', padding: '0 var(--space-2)' }}>
+            <span style={{ fontSize: '18px', fontWeight: '500', color: 'var(--text-primary)' }}>Camunda Hub</span>
+          </div>
+          
+          <Link to="/" style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: 'var(--space-2)', 
+            padding: 'var(--space-2)',
+            borderRadius: '4px',
+            color: 'var(--text-secondary)'
+          }} className="nav-link">
+            <LayoutDashboard size={18} />
+            <span>Dashboard</span>
+          </Link>
+          
+          <Link to="/tasks" style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: 'var(--space-2)', 
+            padding: 'var(--space-2)',
+            borderRadius: '4px',
+            color: 'var(--text-secondary)'
+          }} className="nav-link">
+            <ListTodo size={18} />
+            <span>Tasks</span>
+          </Link>
+
+          <Link to="/processes" style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: 'var(--space-2)', 
+            padding: 'var(--space-2)',
+            borderRadius: '4px',
+            color: 'var(--text-secondary)'
+          }} className="nav-link">
+            <GitFork size={18} />
+            <span>Processes</span>
+          </Link>
+
+          <div style={{ marginTop: 'auto' }}>
+            <Link to="/settings" style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: 'var(--space-2)', 
+              padding: 'var(--space-2)',
+              borderRadius: '4px',
+              color: 'var(--text-secondary)'
+            }} className="nav-link">
+              <Settings size={18} />
+              <span>Settings</span>
+            </Link>
+          </div>
+        </nav>
+
+        {/* Main Content */}
+        <main style={{ flex: 1, overflowY: 'auto' }}>
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/tasks" element={<Tasks />} />
+            <Route path="/processes" element={<div style={{ padding: 'var(--space-4)' }}><h1>Processes</h1></div>} />
+            <Route path="/settings" element={<div style={{ padding: 'var(--space-4)' }}><h1>Settings</h1></div>} />
+          </Routes>
+        </main>
+      </div>
+
+      <style>{`
+        .nav-link:hover {
+          background: var(--bg-surface);
+          color: var(--text-primary) !important;
+        }
+      `}</style>
+    </Router>
+  );
 }
 
-// ProLayout 支持的api https://procomponents.ant.design/components/layout
-export const layout: RunTimeLayoutConfig = ({
-  initialState,
-  setInitialState,
-}) => {
-  return {
-    actionsRender: () => [
-      <Question key="doc" />,
-      <SelectLang key="SelectLang" />,
-    ],
-    menuItemRender: (item, dom) => {
-      if (item.path) {
-        return (
-          <Link to={item.path} prefetch>
-            {dom}
-          </Link>
-        );
-      }
-      return dom;
-    },
-    avatarProps: {
-      src: initialState?.currentUser?.avatar,
-      title: <AvatarName />,
-      render: (_, avatarChildren) => (
-        <AvatarDropdown>{avatarChildren}</AvatarDropdown>
-      ),
-    },
-    // waterMarkProps: {
-    //   content: initialState?.currentUser?.name,
-    // },
-    footerRender: () => <Footer />,
-    onPageChange: () => {
-      const { location } = history;
-      // 如果没有登录，重定向到 login
-      if (!initialState?.currentUser && location.pathname !== loginPath) {
-        history.push(loginPath);
-      }
-    },
-    bgLayoutImgList: [
-      {
-        src: 'https://mdn.alipayobjects.com/yuyan_qk0oxh/afts/img/D2LWSqNny4sAAAAAAAAAAAAAFl94AQBr',
-        left: 85,
-        bottom: 100,
-        height: '303px',
-      },
-      {
-        src: 'https://mdn.alipayobjects.com/yuyan_qk0oxh/afts/img/C2TWRpJpiC0AAAAAAAAAAAAAFl94AQBr',
-        bottom: -68,
-        right: -45,
-        height: '303px',
-      },
-      {
-        src: 'https://mdn.alipayobjects.com/yuyan_qk0oxh/afts/img/F6vSTbj8KpYAAAAAAAAAAAAAFl94AQBr',
-        bottom: 0,
-        left: 0,
-        width: '331px',
-      },
-    ],
-    links: isDev
-      ? [
-          <Link key="openapi" to="/umi/plugin/openapi" target="_blank">
-            <LinkOutlined />
-            <span>OpenAPI 文档</span>
-          </Link>,
-        ]
-      : [],
-    menuHeaderRender: undefined,
-    // 自定义 403 页面
-    // unAccessible: <div>unAccessible</div>,
-    // 增加一个 loading 的状态
-    childrenRender: (children) => {
-      // if (initialState?.loading) return <PageLoading />;
-      return (
-        <>
-          {children}
-          {isDevOrTest && (
-            <SettingDrawer
-              disableUrlParams
-              enableDarkTheme
-              settings={initialState?.settings}
-              onSettingChange={(settings) => {
-                setInitialState((preInitialState) => ({
-                  ...preInitialState,
-                  settings,
-                }));
-              }}
-            />
-          )}
-        </>
-      );
-    },
-    ...initialState?.settings,
-  };
-};
-
-/**
- * @name request 配置，可以配置错误处理
- * 它基于 axios 提供了一套统一的网络请求和错误处理方案。
- * @doc https://umijs.org/docs/max/request#配置
- */
-export const request: RequestConfig = {
-  baseURL: '',
-  ...errorConfig,
-};
+export default App;
