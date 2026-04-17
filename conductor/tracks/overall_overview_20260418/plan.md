@@ -10,10 +10,10 @@
     - [ ] Implement endpoint.
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Backend API Enhancements' (Protocol in workflow.md) 454ac23
 
-## Phase 2: Frontend Data Layer & Routing
+## Phase 2: Frontend Data Layer & Routing [checkpoint: 771867e]
 - [x] Task: Update Sidebar/Header navigation links from "Global Dashboard" to "Overall Overview" (整体概览). 3cc17fe
 - [x] Task: Create `camundaService.getMetrics()` method to fetch data from the new backend endpoint, supporting date range parameters. f5c5667
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Frontend Data Layer & Routing' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Frontend Data Layer & Routing' (Protocol in workflow.md) 771867e
 
 ## Phase 3: Frontend UI Components (Widget Grid)
 - [ ] Task: Design and implement the flexible Widget Grid container component.
