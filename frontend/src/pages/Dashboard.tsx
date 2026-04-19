@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { PlayCircle, GitBranch, RefreshCw, Calendar, Clock } from 'lucide-react';
-import { camundaService, Metrics, ProcessDefinition } from '../services/camundaService';
+import { camundaService } from '../services/camundaService';
+import type { Metrics, ProcessDefinition } from '../services/camundaService';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '../components/ui/Card';
 import { WidgetGrid, WidgetCard } from '../components/ui/WidgetGrid';
@@ -139,7 +140,9 @@ export const Dashboard: React.FC = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {Array(4).fill(0).map((_, i) => (
-            <Card key={i} className="p-6 h-48 bg-white/50 animate-pulse border-border-cream" />
+            <Card key={i} className="p-6 h-48 bg-white/50 animate-pulse border-border-cream">
+              <div className="h-full w-full" />
+            </Card>
           ))}
         </div>
       )}
@@ -159,7 +162,9 @@ export const Dashboard: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {loading ? (
             Array(4).fill(0).map((_, i) => (
-              <Card key={i} className="p-6 h-48 bg-white/50 animate-pulse border-border-cream" />
+              <Card key={i} className="p-6 h-48 bg-white/50 animate-pulse border-border-cream">
+                <div className="h-full w-full" />
+              </Card>
             ))
           ) : models.length === 0 ? (
             <div className="col-span-full p-12 text-center text-stone-gray font-sans italic bg-white rounded-comfortable border border-dashed border-border-warm">
