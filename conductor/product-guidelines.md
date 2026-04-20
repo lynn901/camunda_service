@@ -6,7 +6,7 @@
 
 ## UX & UI Principles
 - **Efficiency Over Aesthetics:** Prioritize clear information hierarchy and fast data access for monitoring dashboards.
-- **Modern Precision:** Adhere to a high-precision, light-themed aesthetic with a focus on surface-based information layering, Newsreader headlines, and real-time status indicators.
+- **Modern Precision:** Adhere to a warm, editorial aesthetic inspired by Claude (Anthropic), focusing on Parchment backgrounds, Georgia serif headlines, and ring-based information layering.
 - **Feedback Loops:** Provide immediate visual feedback for user actions (e.g., starting a process, completing a task).
 
 ## Development Philosophy
