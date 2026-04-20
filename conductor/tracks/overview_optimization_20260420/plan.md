@@ -38,7 +38,7 @@ To refactor the "Overall Overview" dashboard to match the Claude-inspired design
 ## Phase 3: Model Matrix Enhancements
 *Focus: Adding instance metrics and expanding the matrix layout.*
 
-- [ ] Task: Service Update for Metrics
+- [x] Task: Service Update for Metrics [7a5d2b4]
     - [ ] Update `camundaService.ts` to include methods for fetching "Completed" and "Running" instance counts per model.
     - [ ] **TDD:** Write unit tests in `camundaService.test.ts` to mock and verify the new data fetching logic.
 - [ ] Task: Update Matrix Cards with Counters
