@@ -13,7 +13,7 @@ export const Sidebar: React.FC = () => {
   ];
 
   return (
-    <aside className="w-64 bg-surface-container text-on-surface h-screen flex flex-col fixed left-0 top-0 shadow-[12px_0_32px_-4px_rgba(48,52,42,0.08)] py-8 px-4 z-50">
+    <aside className="hidden lg:flex w-64 bg-surface-container text-on-surface h-screen flex-col fixed left-0 top-0 shadow-[12px_0_32px_-4px_rgba(48,52,42,0.08)] py-8 px-4 z-50">
       <div className="mb-10 px-2">
         <span className="font-headline text-xl font-bold italic text-on-surface">The Engine</span>
         <p className="font-headline text-[10px] tracking-tight text-on-surface-variant/70 uppercase">生产环境</p>
