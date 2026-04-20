@@ -1,29 +1,42 @@
 import React from 'react';
-import { Search, Settings, Terminal } from 'lucide-react';
+import { Search, Bell, History, Settings } from 'lucide-react';
 
 export const Header: React.FC = () => {
   return (
-    <header className="h-16 bg-white border-b border-border-cream px-8 flex items-center justify-between sticky top-0 z-10">
-      <div className="flex items-center gap-3">
-        <Terminal className="text-stone-gray w-4 h-4" />
-        <span className="text-[10px] text-stone-gray uppercase tracking-widest font-sans font-medium">/ 运维控制台 (OpsConsole) /</span>
-        <h2 className="text-sm font-sans font-bold text-anthropic-black">整体概览</h2>
+    <header className="w-full h-16 sticky top-0 z-40 bg-surface/80 backdrop-blur-md flex items-center justify-between px-8 border-b border-on-surface/5">
+      <div className="flex items-center space-x-6">
+        <span className="font-headline text-lg font-semibold text-on-surface">Camunda 运维</span>
+        <nav className="hidden md:flex items-center space-x-4">
+          <a className="text-on-surface-variant font-body text-xs uppercase tracking-widest hover:text-on-surface" href="#">日志</a>
+          <a className="text-on-surface-variant font-body text-xs uppercase tracking-widest hover:text-on-surface" href="#">警报</a>
+          <a className="text-on-surface-variant font-body text-xs uppercase tracking-widest hover:text-on-surface" href="#">支持</a>
+        </nav>
       </div>
-      
-      <div className="flex items-center gap-6">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-gray w-3.5 h-3.5" />
+
+      <div className="flex items-center space-x-4">
+        <div className="relative group">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/50 w-3.5 h-3.5" />
           <input 
             type="text" 
-            placeholder="搜索实例 ID / 业务标识..." 
-            className="pl-9 pr-4 py-2 bg-ivory border border-border-cream rounded-generous text-xs font-sans w-64 focus:outline-none focus:ring-1 focus:ring-terracotta transition-all"
+            placeholder="全局搜索..." 
+            className="bg-surface-container-low border-none ring-1 ring-outline-variant/20 focus:ring-tertiary py-1.5 pl-9 pr-4 text-xs w-64 rounded font-body outline-none"
           />
         </div>
         
-        <div className="h-4 w-[1px] bg-border-warm" />
-        
-        <button className="text-stone-gray hover:text-terracotta transition-colors">
-          <Settings className="w-4 h-4" />
+        <div className="flex items-center space-x-2">
+          <button className="p-2 text-on-surface-variant hover:text-on-surface transition-colors">
+            <Bell className="w-4 h-4" />
+          </button>
+          <button className="p-2 text-on-surface-variant hover:text-on-surface transition-colors">
+            <History className="w-4 h-4" />
+          </button>
+        </div>
+
+        <button className="px-4 py-1.5 bg-surface-container-highest text-on-surface font-body text-[10px] uppercase tracking-widest font-bold hover:bg-surface-container-high transition-colors">
+          管理控制
+        </button>
+        <button className="px-4 py-1.5 bg-primary text-on-primary font-body text-[10px] uppercase tracking-widest font-bold ring-1 ring-outline-variant/30 shadow-sm hover:bg-primary-dim transition-colors">
+          干预
         </button>
       </div>
     </header>
