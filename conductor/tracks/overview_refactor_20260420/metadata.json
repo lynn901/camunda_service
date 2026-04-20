@@ -1,0 +1,8 @@
+{
+  "track_id": "overview_refactor_20260420",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-04-20T10:00:00Z",
+  "updated_at": "2026-04-20T10:00:00Z",
+  "description": "重构整体概览页功能，参考 @.stitch/_1/screen.png @.stitch/_1/code.html"
+}
