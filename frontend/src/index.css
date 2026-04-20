@@ -38,12 +38,12 @@
   --color-error: #9e422c;
   --color-outline-variant: #b0b4a5;
 
-  --font-headline: "Newsreader", serif;
-  --font-body: "'Source Han Sans CN'", "Noto Sans SC", sans-serif;
-  --font-label: "'Source Han Sans CN'", "Noto Sans SC", sans-serif;
+  --font-headline: var(--font-serif);
+  --font-body: var(--font-sans);
+  --font-label: var(--font-sans);
 
   --font-serif: Georgia, serif;
-  --font-sans: Inter, system-ui, sans-serif;
+  --font-sans: system-ui, Arial, sans-serif;
   --font-mono: "Courier New", monospace;
 
   --radius-sharp: 4px;
