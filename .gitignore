@@ -33,3 +33,6 @@ target/
 ### Logs ###
 *.log
 logs/
+
+### Stitch ###
+.stitch/

@@ -11,15 +11,16 @@ COPY src ./src
 RUN mvn clean package -DskipTests -B
 
 # ====== Run Stage ======
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:17-jre
 
-# 安装时区支持 (Alpine 默认不带 tzdata)
-RUN apk add --no-cache tzdata \
+# 安装时区支持
+RUN apt-get update && apt-get install -y tzdata \
     && ln -snf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
-    && echo "Asia/Shanghai" > /etc/timezone
+    && echo "Asia/Shanghai" > /etc/timezone \
+    && rm -rf /var/lib/apt/lists/*
 
-# 创建非 root 用户 (Alpine 使用 addgroup/adduser)
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+# 创建非 root 用户
+RUN groupadd -r appgroup && useradd -r -g appgroup appuser
 WORKDIR /app
 
 # 复制生成的 jar
@@ -29,9 +30,9 @@ RUN chown appuser:appgroup app.jar
 USER appuser
 EXPOSE 8080
 
-# 健康检查：使用 Alpine 自带的 wget
+# 健康检查
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-  CMD wget --spider -q http://localhost:8080/actuator/health || exit 1
+  CMD curl -f http://localhost:8080/actuator/health || exit 1
 
 # 生产环境 JVM 参数调优
 ENTRYPOINT ["java", \
