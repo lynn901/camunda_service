@@ -20,8 +20,8 @@
 - [x] Task: Implement the data export feature, ensuring tests pass. 369cf8e
 - [x] Task: Conductor - User Manual Verification 'Phase 3: Interactivity (Real-time Refresh, Filtering, Export)' (Protocol in workflow.md) 1d524b5
 
-## Phase 4: Assembly and Desktop Optimization
-- [ ] Task: Assemble the refactored components in `Dashboard.tsx` and ensure correct data wiring.
-- [ ] Task: Apply Desktop-first CSS styling and layout adjustments to match the design flawlessly on large monitors.
-- [ ] Task: Refactor any redundant CSS/code and confirm the page renders correctly in the browser without regressions.
-- [ ] Task: Conductor - User Manual Verification 'Phase 4: Assembly and Desktop Optimization' (Protocol in workflow.md)
+## Phase 4: Assembly and Desktop Optimization [checkpoint: 3aa6698]
+- [x] Task: Assemble the refactored components in `Dashboard.tsx` and ensure correct data wiring. 0fae905
+- [x] Task: Apply Desktop-first CSS styling and layout adjustments to match the design flawlessly on large monitors. 0fae905
+- [x] Task: Refactor any redundant CSS/code and confirm the page renders correctly in the browser without regressions. 0fae905
+- [x] Task: Conductor - User Manual Verification 'Phase 4: Assembly and Desktop Optimization' (Protocol in workflow.md) 3aa6698
