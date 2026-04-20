@@ -36,7 +36,27 @@ describe('Dashboard Component', () => {
     
     await waitFor(() => {
       expect(screen.getByText('123')).toBeInTheDocument();
-      expect(screen.getByText('流程统计 (Process Stats)')).toBeInTheDocument();
+      expect(screen.getByText('运行中实例')).toBeInTheDocument();
+    });
+  });
+
+  it('should show real-time sync indicator', async () => {
+    (camundaService.getMetrics as any).mockResolvedValue({
+      processStats: { totalInstances: 123, runningInstances: 10, completedInstances: 100, suspendedInstances: 13 },
+      taskMetrics: { taskBacklogs: 5, avgCompletionTime: 500, failureRate: 0.1 },
+      systemHealth: { cpuUsage: 0.5, memoryUsage: 1024, dbConnections: 5 }
+    });
+    (camundaService.getProcessDefinitions as any).mockResolvedValue([]);
+    (camundaService.getEngineVersion as any).mockResolvedValue({ version: '7.20.0' });
+
+    render(
+      <BrowserRouter>
+        <Dashboard />
+      </BrowserRouter>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText(/同步中:/)).toBeInTheDocument();
     });
   });
 });
