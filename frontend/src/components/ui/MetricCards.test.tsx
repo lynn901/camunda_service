@@ -1,7 +1,16 @@
-import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { ProcessStatsCard, TaskMetricsCard, SystemHealthCard } from './MetricCards';
 import { BrowserRouter } from 'react-router-dom';
+
+const mockNavigate = vi.fn();
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom');
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+  };
+});
 
 const mockStats = {
   totalInstances: 123,
@@ -23,17 +32,18 @@ const mockHealth = {
 };
 
 describe('MetricCards Components (Refactor)', () => {
-  it('ProcessStatsCard should render the new layout and labels', () => {
+  it('ProcessStatsCard should navigate to instances when a card is clicked', () => {
     render(
       <BrowserRouter>
         <ProcessStatsCard stats={mockStats} />
       </BrowserRouter>
     );
     
-    // New design expectations (to fail initially)
-    // The design uses "运行中实例" and "已完成实例" as primary KPIs
-    expect(screen.getByText('运行中实例')).toBeInTheDocument();
-    expect(screen.getByText('10')).toBeInTheDocument();
+    // Clicking the "运行中实例" card
+    const runningCard = screen.getByText('运行中实例').closest('div');
+    fireEvent.click(runningCard!);
+    
+    expect(mockNavigate).toHaveBeenCalledWith('/instances?status=running');
   });
 
   it('TaskMetricsCard should render the new layout and labels', () => {
