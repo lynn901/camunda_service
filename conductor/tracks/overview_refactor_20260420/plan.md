@@ -11,14 +11,14 @@
 - [x] Task: Implement the updated `WidgetGrid.tsx` component, ensuring tests pass. cbe0ca5
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Component Refactoring (WidgetGrid & MetricCards)' (Protocol in workflow.md) 345ccbb
 
-## Phase 3: Interactivity (Real-time Refresh, Filtering, Export)
-- [ ] Task: Write failing unit tests for the real-time automatic refresh logic (e.g., polling or WebSocket depending on existing API setup) in the Dashboard page.
-- [ ] Task: Implement real-time automatic refresh, ensuring tests pass.
-- [ ] Task: Write failing unit tests for the "click-to-filter" functionality, ensuring correct navigation to the Instances view with applied query parameters.
-- [ ] Task: Implement the "click-to-filter" functionality, ensuring tests pass.
-- [ ] Task: Write failing unit tests for the data export feature (e.g., CSV or JSON export).
-- [ ] Task: Implement the data export feature, ensuring tests pass.
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Interactivity (Real-time Refresh, Filtering, Export)' (Protocol in workflow.md)
+## Phase 3: Interactivity (Real-time Refresh, Filtering, Export) [checkpoint: 1d524b5]
+- [x] Task: Write failing unit tests for the real-time automatic refresh logic (e.g., polling or WebSocket depending on existing API setup) in the Dashboard page. 43815ac
+- [x] Task: Implement real-time automatic refresh, ensuring tests pass. cbe0ca5
+- [x] Task: Write failing unit tests for the "click-to-filter" functionality, ensuring correct navigation to the Instances view with applied query parameters. 5d3ebda
+- [x] Task: Implement the "click-to-filter" functionality, ensuring tests pass. 5d3ebda
+- [x] Task: Write failing unit tests for the data export feature (e.g., CSV or JSON export). 92fbab4
+- [x] Task: Implement the data export feature, ensuring tests pass. 369cf8e
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Interactivity (Real-time Refresh, Filtering, Export)' (Protocol in workflow.md) 1d524b5
 
 ## Phase 4: Assembly and Desktop Optimization
 - [ ] Task: Assemble the refactored components in `Dashboard.tsx` and ensure correct data wiring.
