@@ -110,124 +110,62 @@ export const Dashboard: React.FC = () => {
         </WidgetGrid>
       )}
 
-      {/* Control & Model Matrix Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        {/* Model Matrix Section - 3 cols */}
-        <div className="lg:col-span-3 space-y-6">
-          <div className="flex justify-between items-center border-b border-outline-variant/10 pb-2">
-            <h3 className="text-xl font-headline font-semibold text-on-surface">模型矩阵</h3>
-            <button 
-              onClick={() => navigate('/models')}
-              className="text-xs font-label uppercase tracking-widest text-tertiary flex items-center hover:underline"
-            >
-              查看仓库 <PlayCircle className="w-3 h-3 ml-1" />
-            </button>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {loading ? (
-              Array(3).fill(0).map((_, i) => (
-                <Card key={i} className="p-6 h-48 bg-surface-container-low animate-pulse border-outline-variant/10" />
-              ))
-            ) : models.length === 0 ? (
-              <div className="col-span-full p-12 text-center text-on-surface-variant italic bg-surface-container-low rounded-comfortable border border-dashed border-outline-variant">
-                暂无已部署的工作流模型。
-              </div>
-            ) : models.slice(0, 6).map((model) => (
-              <WidgetCard 
-                key={model.id} 
-                title={model.name || model.key}
-                className="cursor-pointer"
-                onClick={() => navigate('/instances')}
-              >
-                <div className="flex flex-col space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-2xl font-headline font-semibold">
-                      {/* Random threads for visual consistency with design mockup */}
-                      {Math.floor(Math.random() * 5000).toLocaleString()}
-                    </span>
-                    <span className="text-[10px] font-label text-on-surface-variant/60 uppercase">活动线程</span>
-                  </div>
-                  
-                  <div className="h-12 w-full flex items-end space-x-0.5">
-                    {Array(10).fill(0).map((_, idx) => (
-                      <div 
-                        key={idx} 
-                        className={`flex-1 ${model.suspended ? 'bg-error/30' : 'bg-tertiary/30'} hover:opacity-100 transition-opacity`}
-                        style={{ height: `${20 + Math.random() * 80}%` }}
-                      />
-                    ))}
-                  </div>
-
-                  <div className="flex justify-between items-center text-[10px] font-label text-on-surface-variant/60 uppercase pt-2 border-t border-outline-variant/10">
-                    <span>版本 V{model.version}</span>
-                    <span className={model.suspended ? 'text-error' : 'text-tertiary'}>
-                      {model.suspended ? '已挂起' : '运行中'}
-                    </span>
-                  </div>
-                </div>
-              </WidgetCard>
-            ))}
-          </div>
+      {/* Model Matrix Section */}
+      <div className="space-y-6">
+        <div className="flex justify-between items-center border-b border-outline-variant/10 pb-2">
+          <h3 className="text-xl font-headline font-semibold text-on-surface">模型矩阵</h3>
+          <button 
+            onClick={() => navigate('/models')}
+            className="text-xs font-label uppercase tracking-widest text-tertiary flex items-center hover:underline"
+          >
+            查看仓库 <PlayCircle className="w-3 h-3 ml-1" />
+          </button>
         </div>
-
-        {/* Quick Actions & Sync Controls - 1 col */}
-        <div className="space-y-6">
-          <div className="flex justify-between items-center border-b border-outline-variant/10 pb-2">
-            <h3 className="text-xl font-headline font-semibold text-on-surface">控制面板</h3>
-          </div>
-          
-          <div className="space-y-4">
-            <WidgetCard title="同步设置" icon={RefreshCw}>
-              <div className="space-y-4">
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {loading ? (
+            Array(3).fill(0).map((_, i) => (
+              <Card key={i} className="p-8 h-64 bg-surface-container-low animate-pulse border-outline-variant/10" />
+            ))
+          ) : models.length === 0 ? (
+            <div className="col-span-full p-12 text-center text-on-surface-variant italic bg-surface-container-low rounded-comfortable border border-dashed border-outline-variant">
+              暂无已部署的工作流模型。
+            </div>
+          ) : models.slice(0, 6).map((model) => (
+            <WidgetCard 
+              key={model.id} 
+              title={model.name || model.key}
+              className="cursor-pointer p-8"
+              onClick={() => navigate('/instances')}
+            >
+              <div className="flex flex-col space-y-6">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-on-surface-variant">自动刷新</span>
-                  <input 
-                    type="checkbox" 
-                    checked={autoRefresh}
-                    onChange={(e) => setAutoRefresh(e.target.checked)}
-                    className="w-4 h-4 accent-tertiary cursor-pointer"
-                  />
+                  <span className="text-3xl font-headline font-semibold">
+                    {/* Random threads for visual consistency with design mockup */}
+                    {Math.floor(Math.random() * 5000).toLocaleString()}
+                  </span>
+                  <span className="text-[10px] font-label text-on-surface-variant/60 uppercase">活动线程</span>
                 </div>
-                {autoRefresh && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-on-surface-variant">间隔频率</span>
-                    <select 
-                      value={refreshInterval}
-                      onChange={(e) => setRefreshInterval(Number(e.target.value))}
-                      className="bg-surface-container text-xs font-bold text-tertiary outline-none p-1 rounded"
-                    >
-                      <option value={5}>5s</option>
-                      <option value={10}>10s</option>
-                      <option value={30}>30s</option>
-                      <option value={60}>60s</option>
-                    </select>
-                  </div>
-                )}
-                <Button 
-                  variant="secondary" 
-                  size="sm" 
-                  onClick={fetchDashboardData}
-                  className="w-full flex items-center justify-center gap-2"
-                  disabled={loading}
-                >
-                  <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} />
-                  <span>立即同步数据</span>
-                </Button>
-              </div>
-            </WidgetCard>
+                
+                <div className="h-16 w-full flex items-end space-x-1">
+                  {Array(15).fill(0).map((_, idx) => (
+                    <div 
+                      key={idx} 
+                      className={`flex-1 ${model.suspended ? 'bg-error/30' : 'bg-tertiary/30'} hover:opacity-100 transition-opacity`}
+                      style={{ height: `${20 + Math.random() * 80}%` }}
+                    />
+                  ))}
+                </div>
 
-            <WidgetCard title="快速干预" icon={Zap}>
-              <div className="flex flex-col gap-3">
-                <Button size="sm" onClick={() => navigate('/models')} className="bg-primary hover:bg-primary-dim text-on-primary text-[10px] font-bold uppercase tracking-widest py-2">
-                  部署新模型
-                </Button>
-                <Button variant="secondary" size="sm" onClick={() => navigate('/instances')} className="text-[10px] font-bold uppercase tracking-widest py-2 border-outline-variant/30">
-                  活跃实例监控
-                </Button>
+                <div className="flex justify-between items-center text-[10px] font-label text-on-surface-variant/60 uppercase pt-4 border-t border-outline-variant/10">
+                  <span>版本 V{model.version}</span>
+                  <span className={model.suspended ? 'text-error' : 'text-tertiary'}>
+                    {model.suspended ? '已挂起' : '运行中'}
+                  </span>
+                </div>
               </div>
             </WidgetCard>
-          </div>
+          ))}
         </div>
       </div>
 

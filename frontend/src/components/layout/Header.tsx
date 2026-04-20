@@ -6,11 +6,6 @@ export const Header: React.FC = () => {
     <header className="w-full h-16 sticky top-0 z-40 bg-surface/80 backdrop-blur-md flex items-center justify-between px-8 border-b border-on-surface/5">
       <div className="flex items-center space-x-6">
         <span className="font-headline text-lg font-semibold text-on-surface">Camunda 运维</span>
-        <nav className="hidden md:flex items-center space-x-4">
-          <a className="text-on-surface-variant font-body text-xs uppercase tracking-widest hover:text-on-surface" href="#">日志</a>
-          <a className="text-on-surface-variant font-body text-xs uppercase tracking-widest hover:text-on-surface" href="#">警报</a>
-          <a className="text-on-surface-variant font-body text-xs uppercase tracking-widest hover:text-on-surface" href="#">支持</a>
-        </nav>
       </div>
 
       <div className="flex items-center space-x-4">
@@ -32,9 +27,6 @@ export const Header: React.FC = () => {
           </button>
         </div>
 
-        <button className="px-4 py-1.5 bg-surface-container-highest text-on-surface font-body text-[10px] uppercase tracking-widest font-bold hover:bg-surface-container-high transition-colors">
-          管理控制
-        </button>
         <button className="px-4 py-1.5 bg-primary text-on-primary font-body text-[10px] uppercase tracking-widest font-bold ring-1 ring-outline-variant/30 shadow-sm hover:bg-primary-dim transition-colors">
           干预
         </button>

@@ -24,11 +24,15 @@ interface WidgetCardProps {
   children: React.ReactNode;
   className?: string;
   icon?: React.ElementType;
+  onClick?: () => void;
 }
 
-export const WidgetCard: React.FC<WidgetCardProps> = ({ title, children, className = '', icon: Icon }) => {
+export const WidgetCard: React.FC<WidgetCardProps> = ({ title, children, className = '', icon: Icon, onClick }) => {
   return (
-    <div className={`bg-surface-container-lowest p-6 ring-1 ring-outline-variant/10 shadow-sm hover:scale-[1.01] transition-all duration-300 flex flex-col gap-4 ${className}`}>
+    <div 
+      className={`bg-surface-container-lowest p-6 ring-1 ring-outline-variant/10 shadow-sm hover:scale-[1.01] transition-all duration-300 flex flex-col gap-4 ${className}`}
+      onClick={onClick}
+    >
       <div className="flex justify-between items-center">
         <h3 className="text-[10px] font-label font-bold text-on-surface-variant uppercase tracking-widest">{title}</h3>
         {Icon && <Icon className="w-4 h-4 text-on-surface-variant/50" />}

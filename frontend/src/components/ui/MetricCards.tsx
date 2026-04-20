@@ -2,15 +2,22 @@ import React from 'react';
 import { WidgetCard } from './WidgetGrid';
 import { Clock, TrendingUp, AlertTriangle } from 'lucide-react';
 import type { Metrics } from '../../services/camundaService';
+import { useNavigate } from 'react-router-dom';
 
 interface ProcessStatsCardProps {
   stats: Metrics['processStats'];
 }
 
 export const ProcessStatsCard: React.FC<ProcessStatsCardProps> = ({ stats }) => {
+  const navigate = useNavigate();
+
   return (
     <>
-      <WidgetCard title="运行中实例" className="group">
+      <WidgetCard 
+        title="运行中实例" 
+        className="group cursor-pointer"
+        onClick={() => navigate('/instances?status=running')}
+      >
         <h2 className="text-3xl font-headline font-bold text-on-surface">{stats.runningInstances.toLocaleString()}</h2>
         <div className="mt-4 flex items-center text-[10px] font-bold text-tertiary">
           <TrendingUp className="w-3.5 h-3.5 mr-1" />
@@ -18,7 +25,11 @@ export const ProcessStatsCard: React.FC<ProcessStatsCardProps> = ({ stats }) => 
         </div>
       </WidgetCard>
 
-      <WidgetCard title="已完成实例" className="group">
+      <WidgetCard 
+        title="已完成实例" 
+        className="group cursor-pointer"
+        onClick={() => navigate('/instances?status=completed')}
+      >
         <h2 className="text-3xl font-headline font-bold text-on-surface">{stats.completedInstances.toLocaleString()}</h2>
         <div className="mt-4 flex items-center text-[10px] font-bold text-tertiary">
           <TrendingUp className="w-3.5 h-3.5 mr-1" />
