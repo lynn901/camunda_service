@@ -1,0 +1,8 @@
+{
+  "track_id": "frontend_refactor_20260420",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-04-20T10:00:00Z",
+  "updated_at": "2026-04-20T10:00:00Z",
+  "description": "基于 base.js 重构前端功能，并实现所有功能对接"
+}
