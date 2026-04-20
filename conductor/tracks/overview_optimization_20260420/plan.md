@@ -29,7 +29,7 @@ To refactor the "Overall Overview" dashboard to match the Claude-inspired design
     - [ ] Update `index.css` or `App.css` to use Parchment (`#f5f4ed`) background and Near Black (`#141413`) text.
     - [ ] Configure `Georgia` as the primary serif font and `system-ui/Arial` as the sans-serif font.
     - [ ] **TDD:** Add snapshot tests or style assertion tests to ensure theme colors are applied correctly.
-- [ ] Task: Card and Layout Refactor
+- [x] Task: Card and Layout Refactor [ffd1b3c]
     - [ ] Update `Card.tsx` to use the ring-based shadow (`0px 0px 0px 1px #f0eee6`).
     - [ ] Refactor `Dashboard.tsx` to use generous section spacing (80-120px) and a centered layout.
     - [ ] **TDD:** Verify the layout structure and card styles in `Card.test.tsx` or `Dashboard.test.tsx`.
