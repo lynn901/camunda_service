@@ -9,12 +9,16 @@ vi.mock('../services/camundaService', () => ({
     getMetrics: vi.fn(),
     getProcessDefinitions: vi.fn(),
     getEngineVersion: vi.fn(),
+    getRunningInstanceCount: vi.fn(),
+    getCompletedInstanceCount: vi.fn(),
   }
 }));
 
 describe('Dashboard Component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    (camundaService.getRunningInstanceCount as any).mockResolvedValue(10);
+    (camundaService.getCompletedInstanceCount as any).mockResolvedValue(100);
   });
 
   it('should render metrics and dashboard title', async () => {
@@ -57,6 +61,34 @@ describe('Dashboard Component', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/同步中:/)).toBeInTheDocument();
+    });
+  });
+
+  it('should render model matrix with instance counts', async () => {
+    (camundaService.getMetrics as any).mockResolvedValue({
+      processStats: { totalInstances: 123, runningInstances: 10, completedInstances: 100, suspendedInstances: 13 },
+      taskMetrics: { taskBacklogs: 5, avgCompletionTime: 500, failureRate: 0.1 },
+      systemHealth: { cpuUsage: 0.5, memoryUsage: 1024, dbConnections: 5 }
+    });
+    (camundaService.getProcessDefinitions as any).mockResolvedValue([
+      { id: 'def-1', key: 'process-1', name: 'Process One', version: 1, suspended: false }
+    ]);
+    (camundaService.getEngineVersion as any).mockResolvedValue({ version: '7.20.0' });
+    (camundaService.getRunningInstanceCount as any).mockResolvedValue(5);
+    (camundaService.getCompletedInstanceCount as any).mockResolvedValue(42);
+
+    render(
+      <BrowserRouter>
+        <Dashboard />
+      </BrowserRouter>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Process One')).toBeInTheDocument();
+      expect(screen.getByText('5')).toBeInTheDocument(); // Running
+      expect(screen.getByText('42')).toBeInTheDocument(); // Completed
+      expect(screen.getByText('运行中')).toBeInTheDocument();
+      expect(screen.getByText('已完成')).toBeInTheDocument();
     });
   });
 

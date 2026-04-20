@@ -7,6 +7,7 @@ import { Card } from '../components/ui/Card';
 import { WidgetGrid, WidgetCard } from '../components/ui/WidgetGrid';
 import { ProcessStatsCard, TaskMetricsCard, SystemHealthCard } from '../components/ui/MetricCards';
 import { Button } from '../components/ui/Button';
+import { ModelCard } from '../components/ui/ModelCard';
 
 export const Dashboard: React.FC = () => {
   const [metrics, setMetrics] = useState<Metrics | null>(null);
@@ -132,39 +133,10 @@ export const Dashboard: React.FC = () => {
               暂无已部署的工作流模型。
             </div>
           ) : models.slice(0, 6).map((model) => (
-            <WidgetCard 
+            <ModelCard 
               key={model.id} 
-              title={model.name || model.key}
-              className="cursor-pointer p-8"
-              onClick={() => navigate('/instances')}
-            >
-              <div className="flex flex-col space-y-6">
-                <div className="flex items-center justify-between">
-                  <span className="text-3xl font-headline font-semibold">
-                    {/* Random threads for visual consistency with design mockup */}
-                    {Math.floor(Math.random() * 5000).toLocaleString()}
-                  </span>
-                  <span className="text-[10px] font-label text-on-surface-variant/60 uppercase">活动线程</span>
-                </div>
-                
-                <div className="h-16 w-full flex items-end space-x-1">
-                  {Array(15).fill(0).map((_, idx) => (
-                    <div 
-                      key={idx} 
-                      className={`flex-1 ${model.suspended ? 'bg-error/30' : 'bg-tertiary/30'} hover:opacity-100 transition-opacity`}
-                      style={{ height: `${20 + Math.random() * 80}%` }}
-                    />
-                  ))}
-                </div>
-
-                <div className="flex justify-between items-center text-[10px] font-label text-on-surface-variant/60 uppercase pt-4 border-t border-outline-variant/10">
-                  <span>版本 V{model.version}</span>
-                  <span className={model.suspended ? 'text-error' : 'text-tertiary'}>
-                    {model.suspended ? '已挂起' : '运行中'}
-                  </span>
-                </div>
-              </div>
-            </WidgetCard>
+              model={model}
+            />
           ))}
         </div>
       </div>
