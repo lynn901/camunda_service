@@ -1,0 +1,8 @@
+{
+  "track_id": "overview_optimization_20260420",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-04-20T10:00:00Z",
+  "updated_at": "2026-04-20T10:00:00Z",
+  "description": "Overall overview page optimization: 1. Page style refers to design.md 2. Model matrix displays completed and running instances for each model 3. Remove control panel feature 4. Synchronously remove interactive buttons such as logs, alerts, support, and management control."
+}
