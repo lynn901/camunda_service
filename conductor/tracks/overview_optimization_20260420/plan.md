@@ -45,7 +45,7 @@ To refactor the "Overall Overview" dashboard to match the Claude-inspired design
     - [ ] Modify `Card.tsx` (or the specific model card) to accept and display "Completed" and "Running" counts.
     - [ ] Implement the "Show Zeros" logic as text counters.
     - [ ] **TDD:** Write tests in `MetricCards.test.tsx` to verify counters are displayed correctly.
-- [ ] Task: Expand Matrix Layout
+- [x] Task: Expand Matrix Layout [3242f76]
     - [ ] Adjust `WidgetGrid.tsx` and card styles to use larger cards and more padding, utilizing the freed space.
     - [ ] **TDD:** Verify grid responsiveness and spacing in `WidgetGrid.test.tsx`.
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Model Matrix Enhancements' (Protocol in workflow.md)
