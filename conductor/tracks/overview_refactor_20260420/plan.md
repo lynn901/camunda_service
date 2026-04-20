@@ -4,12 +4,12 @@
 - [x] Task: Review the Stitch design references (`@.stitch/_1/screen.png`, `@.stitch/_1/code.html`) to identify structural differences and required CSS changes. 8cfb614
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Setup and Design Analysis' (Protocol in workflow.md) 8cfb614
 
-## Phase 2: Component Refactoring (WidgetGrid & MetricCards)
-- [ ] Task: Write failing unit tests for the updated `MetricCards.tsx` layout and expected data rendering based on the new design.
-- [ ] Task: Implement the updated `MetricCards.tsx` component, ensuring tests pass.
-- [ ] Task: Write failing unit tests for the updated `WidgetGrid.tsx` layout and grid structure.
-- [ ] Task: Implement the updated `WidgetGrid.tsx` component, ensuring tests pass.
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Component Refactoring (WidgetGrid & MetricCards)' (Protocol in workflow.md)
+## Phase 2: Component Refactoring (WidgetGrid & MetricCards) [checkpoint: 345ccbb]
+- [x] Task: Write failing unit tests for the updated `MetricCards.tsx` layout and expected data rendering based on the new design. 6712462
+- [x] Task: Implement the updated `MetricCards.tsx` component, ensuring tests pass. 52a27e8
+- [x] Task: Write failing unit tests for the updated `WidgetGrid.tsx` layout and grid structure. 395ab7a
+- [x] Task: Implement the updated `WidgetGrid.tsx` component, ensuring tests pass. cbe0ca5
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Component Refactoring (WidgetGrid & MetricCards)' (Protocol in workflow.md) 345ccbb
 
 ## Phase 3: Interactivity (Real-time Refresh, Filtering, Export)
 - [ ] Task: Write failing unit tests for the real-time automatic refresh logic (e.g., polling or WebSocket depending on existing API setup) in the Dashboard page.
