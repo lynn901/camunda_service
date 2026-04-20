@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { Dashboard } from './Dashboard';
 import { camundaService } from '../services/camundaService';
 import { BrowserRouter } from 'react-router-dom';
@@ -35,7 +35,7 @@ describe('Dashboard Component', () => {
     expect(screen.getByText('整体概览')).toBeInTheDocument();
     
     await waitFor(() => {
-      expect(screen.getByText('123')).toBeInTheDocument();
+      expect(screen.getByText('10')).toBeInTheDocument();
       expect(screen.getByText('运行中实例')).toBeInTheDocument();
     });
   });
@@ -57,6 +57,34 @@ describe('Dashboard Component', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/同步中:/)).toBeInTheDocument();
+    });
+  });
+
+  it('should trigger data export when export button is clicked', async () => {
+    const mockMetrics = {
+      processStats: { totalInstances: 123, runningInstances: 10, completedInstances: 100, suspendedInstances: 13 },
+      taskMetrics: { taskBacklogs: 5, avgCompletionTime: 500, failureRate: 0.1 },
+      systemHealth: { cpuUsage: 0.5, memoryUsage: 1024, dbConnections: 5 }
+    };
+    (camundaService.getMetrics as any).mockResolvedValue(mockMetrics);
+    (camundaService.getProcessDefinitions as any).mockResolvedValue([]);
+    (camundaService.getEngineVersion as any).mockResolvedValue({ version: '7.20.0' });
+
+    // Mock URL methods for download
+    const createObjectURLMock = vi.fn();
+    global.URL.createObjectURL = createObjectURLMock;
+    global.URL.revokeObjectURL = vi.fn();
+
+    render(
+      <BrowserRouter>
+        <Dashboard />
+      </BrowserRouter>
+    );
+
+    await waitFor(() => {
+      const exportButton = screen.getByText('导出');
+      fireEvent.click(exportButton);
+      expect(createObjectURLMock).toHaveBeenCalled();
     });
   });
 });
