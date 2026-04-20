@@ -50,7 +50,7 @@ To refactor the "Overall Overview" dashboard to match the Claude-inspired design
     - [ ] **TDD:** Verify grid responsiveness and spacing in `WidgetGrid.test.tsx`.
 - [x] Task: Conductor - User Manual Verification 'Phase 3: Model Matrix Enhancements' (Protocol in workflow.md) [e3b6a32]
 
-## Phase 4: Final Polish & Verification
+## Phase 4: Final Polish & Verification [checkpoint: f656e09]
 *Focus: Ensuring visual consistency and "editorial pacing".*
 
 - [x] Task: Final Visual & Spacing Pass [9a5e796]
@@ -59,4 +59,4 @@ To refactor the "Overall Overview" dashboard to match the Claude-inspired design
 - [x] Task: Project-wide Quality Check [146a531]
     - [ ] Run all frontend tests (`npm test`).
     - [ ] Verify mobile responsiveness of the updated overview page.
-- [ ] Task: Conductor - User Manual Verification 'Phase 4: Final Polish & Verification' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 4: Final Polish & Verification' (Protocol in workflow.md) [f656e09]
