@@ -23,7 +23,7 @@ export const Card: React.FC<CardProps> = ({
     dark: 'bg-dark-surface text-warm-silver border-border-dark'
   };
 
-  const shadowStyles = elevated ? 'whisper-shadow' : 'ring-shadow ring-border-warm';
+  const shadowStyles = elevated ? 'whisper-shadow' : 'ring-shadow ring-border-cream';
 
   return (
     <div 
