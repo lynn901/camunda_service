@@ -1,8 +1,0 @@
-{
-  "track_id": "history_tracking_20260417",
-  "type": "feature",
-  "status": "new",
-  "created_at": "2026-04-17T10:00:00Z",
-  "updated_at": "2026-04-17T10:00:00Z",
-  "description": "Implement process instance history tracking and visualization in the dashboard"
-}
