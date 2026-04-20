@@ -1,0 +1,69 @@
+# Implementation Plan: Refactor Frontend and Integrate with Backend Services
+
+This plan outlines the steps for refactoring the OpsFlowEngine frontend and integrating it with the Camunda 7 backend.
+
+---
+
+## Phase 1: Foundation and Backend API Verification
+
+- [ ] **Task: Verify and Enhance Backend API Endpoints**
+    - [ ] Write unit tests for `WorkflowController` to ensure full coverage of deployment, start instance, and instance management endpoints.
+    - [ ] Implement any missing REST endpoints required by the frontend (e.g., specific metrics or history endpoints).
+    - [ ] Verify endpoints with manual testing against a running Camunda 7 engine.
+- [ ] **Task: Setup Frontend Infrastructure and Type Definitions**
+    - [ ] Initialize the React/TypeScript project with Vite and Tailwind CSS (if not already fully configured).
+    - [ ] Define shared TypeScript interfaces for all backend data structures (ProcessDefinition, ProcessInstance, ActivityInstance, Metrics).
+    - [ ] Configure Axios and React-Query for robust API communication.
+- [ ] **Task: Conductor - User Manual Verification 'Phase 1: Foundation and Backend API Verification' (Protocol in workflow.md)**
+
+## Phase 2: Core Dashboard and Metrics Integration
+
+- [ ] **Task: Implement Dashboard Metrics Visualization**
+    - [ ] Create a metrics service to fetch real-time instance counts (active, completed, failed).
+    - [ ] Implement the Dashboard UI components with real-time data fetching.
+    - [ ] Write tests for the metrics aggregation logic and UI rendering.
+- [ ] **Task: Implement the Workload/Worker Monitoring Module**
+    - [ ] Create an API service to fetch the health status and current task load of external workers.
+    - [ ] Implement the Worker Monitoring list and health status indicators.
+    - [ ] Write unit and integration tests for worker monitoring features.
+- [ ] **Task: Conductor - User Manual Verification 'Phase 2: Core Dashboard and Metrics Integration' (Protocol in workflow.md)**
+
+## Phase 3: Intervention Center and Instance Management
+
+- [ ] **Task: Refactor the Instance List with Real-time Filtering**
+    - [ ] Implement a filterable list of all running/failed process instances fetching from the Camunda History API.
+    - [ ] Implement the instance status indicators and progress bars using real backend data.
+    - [ ] Write tests for the instance filtering and status mapping logic.
+- [ ] **Task: Implement the Intervention Tools (Retry, Suspend, Delete)**
+    - [ ] Integrate backend operations for instance retry, suspension, and deletion into the frontend.
+    - [ ] Create UI controls with proper confirmation modals and error handling.
+    - [ ] Write integration tests for these high-impact operations.
+- [ ] **Task: Implement the Process Diagram (bpmn-js) and Variable Management**
+    - [ ] Integrate `bpmn-js` to render the process model for a selected instance, highlighting the current active/failed nodes.
+    - [ ] Implement the "hot" variable management interface allowing viewing and updating of process variables.
+    - [ ] Write tests for variable modification and diagram highlighting.
+- [ ] **Task: Conductor - User Manual Verification 'Phase 3: Intervention Center and Instance Management' (Protocol in workflow.md)**
+
+## Phase 4: BPMN Library and Deployment Automation
+
+- [ ] **Task: Implement the BPMN Model Library and Versioning**
+    - [ ] Create a list view for all deployed process definitions with version history and deployment timestamps.
+    - [ ] Implement the "Manual Trigger" interface with dynamic JSON payload support for launching instances.
+    - [ ] Write tests for deployment listing and manual instance triggering.
+- [ ] **Task: Implement the BPMN File Deployment Interface**
+    - [ ] Create a web-based upload interface for deploying `.bpmn` and `.xml` files to the engine.
+    - [ ] Implement backend file parsing and error reporting for failed deployments.
+    - [ ] Write integration tests for the full deployment flow.
+- [ ] **Task: Conductor - User Manual Verification 'Phase 4: BPMN Library and Deployment Automation' (Protocol in workflow.md)**
+
+## Phase 5: Execution History and Audit Logs
+
+- [ ] **Task: Implement the Historical Instance Archive**
+    - [ ] Create a read-only archive view for all completed or terminated process instances.
+    - [ ] Implement the duration analysis and final variable snapshot view for each historical instance.
+    - [ ] Write tests for historical data retrieval and duration calculations.
+- [ ] **Task: Implement the Audit Logs and Operation Tracking**
+    - [ ] Integrate the audit log API to track all human and system interventions.
+    - [ ] Implement the audit log view with filtering by operator and action type.
+    - [ ] Write tests for log retrieval and filtering.
+- [ ] **Task: Conductor - User Manual Verification 'Phase 5: Execution History and Audit Logs' (Protocol in workflow.md)**
