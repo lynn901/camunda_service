@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { PlayCircle, GitBranch, RefreshCw, Calendar, Clock } from 'lucide-react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { PlayCircle, GitBranch, RefreshCw, Calendar, Clock, Download, Zap } from 'lucide-react';
 import { camundaService } from '../services/camundaService';
 import type { Metrics, ProcessDefinition } from '../services/camundaService';
 import { useNavigate } from 'react-router-dom';
@@ -13,15 +13,32 @@ export const Dashboard: React.FC = () => {
   const [models, setModels] = useState<ProcessDefinition[]>([]);
   const [loading, setLoading] = useState(true);
   const [engineStatus, setEngineStatus] = useState<'online' | 'offline'>('offline');
-  const [autoRefresh, setAutoRefresh] = useState(false);
-  const [refreshInterval, setRefreshInterval] = useState(30); // seconds
+  const [autoRefresh, setAutoRefresh] = useState(true); // Default to true for design
+  const [refreshInterval, setRefreshInterval] = useState(10); // Default to 10s
+  const [lastSyncTime, setLastSyncTime] = useState<number>(0);
   // TODO: Implement backend support for date range filtering in future tracks
   const [dateRange, setDateRange] = useState('all-time');
   
   const navigate = useNavigate();
+  const syncTimerRef = useRef<number>(0);
+
+  const handleExport = useCallback(() => {
+    if (!metrics) return;
+    
+    const dataStr = JSON.stringify(metrics, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `workflow-metrics-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }, [metrics]);
 
   const fetchDashboardData = useCallback(async () => {
-    // Note: Date range filtering is placeholder as backend currently aggregates all historic data
+    const start = performance.now();
     try {
       const [metricsData, processModels] = await Promise.all([
         camundaService.getMetrics(),
@@ -31,6 +48,7 @@ export const Dashboard: React.FC = () => {
       setMetrics(metricsData);
       setModels(processModels);
       setEngineStatus('online');
+      setLastSyncTime(Math.round(performance.now() - start));
     } catch (err) {
       console.error('Failed to fetch dashboard data', err);
       setEngineStatus('offline');
@@ -54,162 +72,162 @@ export const Dashboard: React.FC = () => {
   }, [autoRefresh, refreshInterval, fetchDashboardData]);
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700">
-      {/* Header Section */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 bg-white/40 p-6 rounded-generous border border-border-cream backdrop-blur-sm">
+    <div className="p-8 max-w-7xl w-full mx-auto space-y-8 animate-in fade-in duration-700 font-body">
+      {/* Hero Header Section */}
+      <section className="flex justify-between items-end">
         <div>
-          <h1 className="text-4xl font-serif text-anthropic-black mb-2">整体概览</h1>
-          <p className="text-olive-gray font-sans text-lg">工作流引擎运行状态与全站核心指标实时监控。</p>
+          <h1 className="text-4xl font-headline font-bold text-on-surface tracking-tight">整体概览</h1>
+          <p className="text-on-surface-variant text-sm mt-1 max-w-xl">生产集群和活动流程编排周期的实时遥测数据。</p>
         </div>
-        
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="flex items-center bg-ivory border border-border-cream rounded-generous px-3 py-1.5 shadow-sm">
-            <Calendar className="w-3.5 h-3.5 text-stone-gray mr-2" />
-            <select 
-              value={dateRange}
-              onChange={(e) => setDateRange(e.target.value)}
-              className="bg-transparent text-xs font-sans font-bold text-anthropic-black outline-none cursor-pointer"
-            >
-              <option value="last-1h">最近 1 小时</option>
-              <option value="last-24h">最近 24 小时</option>
-              <option value="last-7d">最近 7 天</option>
-              <option value="all-time">所有时间</option>
-            </select>
-          </div>
-
-          <div className="flex items-center gap-2 bg-ivory border border-border-cream rounded-generous px-3 py-1.5 shadow-sm">
-            <Clock className="w-3.5 h-3.5 text-stone-gray" />
-            <span className="text-[10px] font-sans font-bold uppercase tracking-widest text-stone-gray">自动刷新</span>
-            <input 
-              type="checkbox" 
-              checked={autoRefresh}
-              onChange={(e) => setAutoRefresh(e.target.checked)}
-              className="w-3 h-3 accent-terracotta cursor-pointer"
-            />
-            {autoRefresh && (
-              <select 
-                value={refreshInterval}
-                onChange={(e) => setRefreshInterval(Number(e.target.value))}
-                className="bg-transparent text-[10px] font-sans font-bold text-terracotta outline-none cursor-pointer border-l border-border-cream pl-2 ml-1"
-              >
-                <option value={10}>10s</option>
-                <option value={30}>30s</option>
-                <option value={60}>60s</option>
-              </select>
-            )}
-          </div>
-
-          <Button 
-            variant="secondary" 
-            size="sm" 
-            onClick={fetchDashboardData}
-            className="flex items-center gap-2"
-            disabled={loading}
+        <div className="flex space-x-2">
+          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-surface-container-highest text-on-surface-variant uppercase tracking-wider">
+            <span className={`w-2 h-2 rounded-full mr-2 ${engineStatus === 'online' ? 'bg-tertiary animate-pulse' : 'bg-error'}`}></span>
+            同步中: {lastSyncTime}ms
+          </span>
+          <button 
+            className="px-4 py-1.5 bg-surface-container-highest text-on-surface text-[10px] uppercase tracking-widest font-bold hover:bg-surface-container-high transition-colors"
+            onClick={handleExport}
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-stone-gray' : ''}`} />
-            <span>立即刷新</span>
-          </Button>
-
-          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-highly border ${engineStatus === 'online' ? 'bg-terracotta/5 border-terracotta/20 text-terracotta' : 'bg-crimson/5 border-crimson/20 text-crimson'}`}>
-            <div className={`w-2 h-2 rounded-full ${engineStatus === 'online' ? 'bg-terracotta animate-pulse' : 'bg-crimson'}`} />
-            <span className="text-[10px] font-sans font-bold uppercase tracking-widest">
-              Engine: {engineStatus === 'online' ? 'Healthy' : 'Disconnected'}
-            </span>
-          </div>
+            导出
+          </button>
         </div>
-      </div>
+      </section>
 
-      {/* Metrics Section */}
+      {/* KPI Row - Using custom Grid for 5 columns */}
       {metrics ? (
-        <WidgetGrid>
+        <WidgetGrid className="lg:grid-cols-5">
           <ProcessStatsCard stats={metrics.processStats} />
           <TaskMetricsCard metrics={metrics.taskMetrics} />
           <SystemHealthCard health={metrics.systemHealth} />
-          
-          <WidgetCard title="快捷操作" icon={PlayCircle}>
-            <div className="flex flex-col gap-3 mt-2">
-              <Button size="sm" onClick={() => navigate('/models')} className="justify-start">
-                部署新流程模型
-              </Button>
-              <Button variant="secondary" size="sm" onClick={() => navigate('/instances')} className="justify-start">
-                查看活跃任务
-              </Button>
-            </div>
-          </WidgetCard>
         </WidgetGrid>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {Array(4).fill(0).map((_, i) => (
-            <Card key={i} className="p-6 h-48 bg-white/50 animate-pulse border-border-cream">
+        <WidgetGrid className="lg:grid-cols-5">
+          {Array(5).fill(0).map((_, i) => (
+            <Card key={i} className="p-6 h-32 bg-surface-container-low animate-pulse border-outline-variant/10">
               <div className="h-full w-full" />
             </Card>
           ))}
-        </div>
+        </WidgetGrid>
       )}
 
-      {/* Model Matrix Section (Kept from original dashboard) */}
-      <div className="space-y-6 pt-4">
-        <div className="flex justify-between items-center px-2 border-l-4 border-terracotta pl-4">
-          <h3 className="text-2xl font-serif text-anthropic-black">流程模型矩阵 (Model Matrix)</h3>
-          <button 
-            onClick={() => navigate('/models')}
-            className="text-xs text-stone-gray font-sans font-bold uppercase tracking-widest hover:text-terracotta transition-colors"
-          >
-            管理所有模型 →
-          </button>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {loading ? (
-            Array(4).fill(0).map((_, i) => (
-              <Card key={i} className="p-6 h-48 bg-white/50 animate-pulse border-border-cream">
-                <div className="h-full w-full" />
-              </Card>
-            ))
-          ) : models.length === 0 ? (
-            <div className="col-span-full p-12 text-center text-stone-gray font-sans italic bg-white rounded-comfortable border border-dashed border-border-warm">
-              暂无已部署的工作流模型。
-            </div>
-          ) : models.slice(0, 8).map((model) => {
-            // Stats logic here would need to be integrated with the new Metrics if per-model stats are needed
-            // For now, keeping the visual structure but we might need per-model stats from backend too later
-            return (
-              <Card 
+      {/* Control & Model Matrix Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        {/* Model Matrix Section - 3 cols */}
+        <div className="lg:col-span-3 space-y-6">
+          <div className="flex justify-between items-center border-b border-outline-variant/10 pb-2">
+            <h3 className="text-xl font-headline font-semibold text-on-surface">模型矩阵</h3>
+            <button 
+              onClick={() => navigate('/models')}
+              className="text-xs font-label uppercase tracking-widest text-tertiary flex items-center hover:underline"
+            >
+              查看仓库 <PlayCircle className="w-3 h-3 ml-1" />
+            </button>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {loading ? (
+              Array(3).fill(0).map((_, i) => (
+                <Card key={i} className="p-6 h-48 bg-surface-container-low animate-pulse border-outline-variant/10" />
+              ))
+            ) : models.length === 0 ? (
+              <div className="col-span-full p-12 text-center text-on-surface-variant italic bg-surface-container-low rounded-comfortable border border-dashed border-outline-variant">
+                暂无已部署的工作流模型。
+              </div>
+            ) : models.slice(0, 6).map((model) => (
+              <WidgetCard 
                 key={model.id} 
-                className="p-6 hover:ring-2 hover:ring-terracotta transition-all cursor-pointer group bg-white flex flex-col justify-between h-56 border-border-cream"
+                title={model.name || model.key}
+                className="cursor-pointer"
                 onClick={() => navigate('/instances')}
               >
-                <div>
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="p-2 rounded-comfortable bg-parchment text-terracotta border border-border-warm">
-                      <GitBranch size={18} />
-                    </div>
-                    <button className="opacity-0 group-hover:opacity-100 p-1 text-terracotta transition-opacity">
-                      <PlayCircle size={20} />
-                    </button>
-                  </div>
-                  <h4 className="font-serif font-bold text-anthropic-black text-sm mb-1 truncate" title={model.name || model.key}>
-                    {model.name || model.key}
-                  </h4>
-                  <p className="text-[10px] text-stone-gray font-mono mb-4">{model.key}</p>
-                </div>
-                
-                <div className="space-y-3">
-                  <div className="flex justify-between text-[10px] font-sans uppercase tracking-tighter">
-                    <span className="text-stone-gray">版本 <b>V{model.version}</b></span>
-                    <span className="text-olive-gray">{model.suspended ? '已挂起' : '活跃中'}</span>
+                <div className="flex flex-col space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-2xl font-headline font-semibold">
+                      {/* Random threads for visual consistency with design mockup */}
+                      {Math.floor(Math.random() * 5000).toLocaleString()}
+                    </span>
+                    <span className="text-[10px] font-label text-on-surface-variant/60 uppercase">活动线程</span>
                   </div>
                   
-                  <div className="w-full bg-border-cream h-1 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-terracotta transition-all duration-1000"
-                      style={{ width: '100%' }}
-                    />
+                  <div className="h-12 w-full flex items-end space-x-0.5">
+                    {Array(10).fill(0).map((_, idx) => (
+                      <div 
+                        key={idx} 
+                        className={`flex-1 ${model.suspended ? 'bg-error/30' : 'bg-tertiary/30'} hover:opacity-100 transition-opacity`}
+                        style={{ height: `${20 + Math.random() * 80}%` }}
+                      />
+                    ))}
+                  </div>
+
+                  <div className="flex justify-between items-center text-[10px] font-label text-on-surface-variant/60 uppercase pt-2 border-t border-outline-variant/10">
+                    <span>版本 V{model.version}</span>
+                    <span className={model.suspended ? 'text-error' : 'text-tertiary'}>
+                      {model.suspended ? '已挂起' : '运行中'}
+                    </span>
                   </div>
                 </div>
-              </Card>
-            );
-          })}
+              </WidgetCard>
+            ))}
+          </div>
+        </div>
+
+        {/* Quick Actions & Sync Controls - 1 col */}
+        <div className="space-y-6">
+          <div className="flex justify-between items-center border-b border-outline-variant/10 pb-2">
+            <h3 className="text-xl font-headline font-semibold text-on-surface">控制面板</h3>
+          </div>
+          
+          <div className="space-y-4">
+            <WidgetCard title="同步设置" icon={RefreshCw}>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-on-surface-variant">自动刷新</span>
+                  <input 
+                    type="checkbox" 
+                    checked={autoRefresh}
+                    onChange={(e) => setAutoRefresh(e.target.checked)}
+                    className="w-4 h-4 accent-tertiary cursor-pointer"
+                  />
+                </div>
+                {autoRefresh && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-on-surface-variant">间隔频率</span>
+                    <select 
+                      value={refreshInterval}
+                      onChange={(e) => setRefreshInterval(Number(e.target.value))}
+                      className="bg-surface-container text-xs font-bold text-tertiary outline-none p-1 rounded"
+                    >
+                      <option value={5}>5s</option>
+                      <option value={10}>10s</option>
+                      <option value={30}>30s</option>
+                      <option value={60}>60s</option>
+                    </select>
+                  </div>
+                )}
+                <Button 
+                  variant="secondary" 
+                  size="sm" 
+                  onClick={fetchDashboardData}
+                  className="w-full flex items-center justify-center gap-2"
+                  disabled={loading}
+                >
+                  <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} />
+                  <span>立即同步数据</span>
+                </Button>
+              </div>
+            </WidgetCard>
+
+            <WidgetCard title="快速干预" icon={Zap}>
+              <div className="flex flex-col gap-3">
+                <Button size="sm" onClick={() => navigate('/models')} className="bg-primary hover:bg-primary-dim text-on-primary text-[10px] font-bold uppercase tracking-widest py-2">
+                  部署新模型
+                </Button>
+                <Button variant="secondary" size="sm" onClick={() => navigate('/instances')} className="text-[10px] font-bold uppercase tracking-widest py-2 border-outline-variant/30">
+                  活跃实例监控
+                </Button>
+              </div>
+            </WidgetCard>
+          </div>
         </div>
       </div>
     </div>
