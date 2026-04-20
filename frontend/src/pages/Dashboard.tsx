@@ -230,6 +230,74 @@ export const Dashboard: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Bottom Content: Recent Interventions & Anomaly Alert Stream */}
+      <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 bg-surface-container-low p-6 ring-1 ring-outline-variant/10">
+          <h3 className="text-xl font-headline font-semibold mb-6 text-on-surface">最近干预</h3>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-3 bg-surface-container-lowest border-l-4 border-tertiary">
+              <div className="flex items-center space-x-4">
+                <Zap className="w-4 h-4 text-tertiary" />
+                <div>
+                  <p className="text-xs font-bold">节点扩容: AWS-EAST-1</p>
+                  <p className="text-[10px] text-on-surface-variant">实例激增触发自动扩容组。</p>
+                </div>
+              </div>
+              <p className="text-[10px] font-label text-on-surface-variant">2分钟前</p>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-surface-container-lowest border-l-4 border-error">
+              <div className="flex items-center space-x-4">
+                <Zap className="w-4 h-4 text-error" />
+                <div>
+                  <p className="text-xs font-bold">模型停止: Settlement-Core</p>
+                  <p className="text-[10px] text-on-surface-variant">由于数据库锁定，由运维管理员手动干预。</p>
+                </div>
+              </div>
+              <p className="text-[10px] font-label text-on-surface-variant">14分钟前</p>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-surface-container-lowest border-l-4 border-outline-variant">
+              <div className="flex items-center space-x-4">
+                <Zap className="w-4 h-4 text-outline-variant" />
+                <div>
+                  <p className="text-xs font-bold">部署: Analytics-V4</p>
+                  <p className="text-[10px] text-on-surface-variant">滚动更新成功同步至所有节点。</p>
+                </div>
+              </div>
+              <p className="text-[10px] font-label text-on-surface-variant">1小时前</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-surface-container-low p-6 ring-1 ring-outline-variant/10 flex flex-col">
+          <h3 className="text-xl font-headline font-semibold mb-6 text-on-surface">异常警报流</h3>
+          <div className="flex-1 space-y-4">
+            <div className="flex items-start space-x-3 pb-4 border-b border-outline-variant/10">
+              <Zap className="w-4 h-4 text-error mt-0.5" />
+              <div className="flex-1 min-w-0">
+                <div className="flex justify-between items-start">
+                  <h4 className="text-xs font-bold truncate">内存使用峰值 - 集群-B</h4>
+                  <span className="text-[10px] text-on-surface-variant/60 whitespace-nowrap ml-2">刚刚</span>
+                </div>
+                <p className="text-[10px] text-on-surface-variant mt-1">节点: node-production-04</p>
+              </div>
+            </div>
+            <div className="flex items-start space-x-3 pb-4 border-b border-outline-variant/10">
+              <Zap className="w-4 h-4 text-error mt-0.5" />
+              <div className="flex-1 min-w-0">
+                <div className="flex justify-between items-start">
+                  <h4 className="text-xs font-bold truncate">模型执行超时</h4>
+                  <span className="text-[10px] text-on-surface-variant/60 whitespace-nowrap ml-2">5分钟前</span>
+                </div>
+                <p className="text-[10px] text-on-surface-variant mt-1">流程: 贷款审批 V2</p>
+              </div>
+            </div>
+          </div>
+          <button className="mt-6 w-full py-2 text-[10px] font-bold uppercase tracking-widest border border-outline-variant/30 hover:bg-surface-container-highest transition-colors">
+            查看所有警报
+          </button>
+        </div>
+      </section>
     </div>
   );
 };
