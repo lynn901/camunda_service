@@ -56,7 +56,7 @@ To refactor the "Overall Overview" dashboard to match the Claude-inspired design
 - [x] Task: Final Visual & Spacing Pass [9a5e796]
     - [ ] Refine "editorial pacing" by adjusting margins and line-heights (1.60 for body text).
     - [ ] Ensure all neutrals are warm-toned (yellow-brown undertones).
-- [ ] Task: Project-wide Quality Check
+- [x] Task: Project-wide Quality Check [146a531]
     - [ ] Run all frontend tests (`npm test`).
     - [ ] Verify mobile responsiveness of the updated overview page.
 - [ ] Task: Conductor - User Manual Verification 'Phase 4: Final Polish & Verification' (Protocol in workflow.md)
