@@ -41,7 +41,7 @@ To refactor the "Overall Overview" dashboard to match the Claude-inspired design
 - [x] Task: Service Update for Metrics [7a5d2b4]
     - [ ] Update `camundaService.ts` to include methods for fetching "Completed" and "Running" instance counts per model.
     - [ ] **TDD:** Write unit tests in `camundaService.test.ts` to mock and verify the new data fetching logic.
-- [ ] Task: Update Matrix Cards with Counters
+- [x] Task: Update Matrix Cards with Counters [a4b335f]
     - [ ] Modify `Card.tsx` (or the specific model card) to accept and display "Completed" and "Running" counts.
     - [ ] Implement the "Show Zeros" logic as text counters.
     - [ ] **TDD:** Write tests in `MetricCards.test.tsx` to verify counters are displayed correctly.
