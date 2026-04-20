@@ -22,6 +22,26 @@
   --color-ring-subtle: #dedc01;
   --color-ring-deep: #c2c0b6;
 
+  /* Stitch Design Tokens */
+  --color-surface: #fbf9f2;
+  --color-on-surface: #30342a;
+  --color-on-surface-variant: #5c6155;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f4f4eb;
+  --color-surface-container: #eeefe4;
+  --color-surface-container-high: #e7e9dc;
+  --color-surface-container-highest: #e1e4d5;
+  --color-primary: #5f5e5d;
+  --color-primary-dim: #535251;
+  --color-on-primary: #faf7f5;
+  --color-tertiary: #0062a3;
+  --color-error: #9e422c;
+  --color-outline-variant: #b0b4a5;
+
+  --font-headline: "Newsreader", serif;
+  --font-body: "'Source Han Sans CN'", "Noto Sans SC", sans-serif;
+  --font-label: "'Source Han Sans CN'", "Noto Sans SC", sans-serif;
+
   --font-serif: Georgia, serif;
   --font-sans: Inter, system-ui, sans-serif;
   --font-mono: "Courier New", monospace;
