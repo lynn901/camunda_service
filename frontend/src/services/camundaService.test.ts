@@ -50,4 +50,28 @@ describe('camundaService', () => {
     expect(fetch).toHaveBeenCalledWith('/api/workflow/metrics');
     expect(result).toEqual(mockMetrics);
   });
+
+  it('should fetch running instance count by process definition key', async () => {
+    (fetch as any).mockResolvedValue({
+      ok: true,
+      json: async () => ({ count: 12 }),
+    });
+
+    const result = await camundaService.getRunningInstanceCount('my-process');
+
+    expect(fetch).toHaveBeenCalledWith('/engine-rest/process-instance/count?processDefinitionKey=my-process');
+    expect(result).toBe(12);
+  });
+
+  it('should fetch completed instance count by process definition key', async () => {
+    (fetch as any).mockResolvedValue({
+      ok: true,
+      json: async () => ({ count: 88 }),
+    });
+
+    const result = await camundaService.getCompletedInstanceCount('my-process');
+
+    expect(fetch).toHaveBeenCalledWith('/engine-rest/history/process-instance/count?processDefinitionKey=my-process&finished=true');
+    expect(result).toBe(88);
+  });
 });

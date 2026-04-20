@@ -299,6 +299,20 @@ export const camundaService = {
     return response.json();
   },
 
+  async getRunningInstanceCount(processDefinitionKey: string): Promise<number> {
+    const response = await fetch(`${ENGINE_REST_URL}/process-instance/count?processDefinitionKey=${processDefinitionKey}`);
+    if (!response.ok) throw new Error('Failed to fetch running instance count');
+    const data = await response.json();
+    return data.count;
+  },
+
+  async getCompletedInstanceCount(processDefinitionKey: string): Promise<number> {
+    const response = await fetch(`${ENGINE_REST_URL}/history/process-instance/count?processDefinitionKey=${processDefinitionKey}&finished=true`);
+    if (!response.ok) throw new Error('Failed to fetch completed instance count');
+    const data = await response.json();
+    return data.count;
+  },
+
   async unlockExternalTask(id: string) {
     const response = await fetch(`${ENGINE_REST_URL}/external-task/${id}/unlock`, {
       method: 'POST',
