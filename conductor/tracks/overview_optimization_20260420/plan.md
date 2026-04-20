@@ -25,7 +25,7 @@ To refactor the "Overall Overview" dashboard to match the Claude-inspired design
 ## Phase 2: Visual Style Overhaul
 *Focus: Implementing the Claude-inspired design system (Parchment theme).*
 
-- [ ] Task: Global Palette and Typography Implementation
+- [x] Task: Global Palette and Typography Implementation [d557e02]
     - [ ] Update `index.css` or `App.css` to use Parchment (`#f5f4ed`) background and Near Black (`#141413`) text.
     - [ ] Configure `Georgia` as the primary serif font and `system-ui/Arial` as the sans-serif font.
     - [ ] **TDD:** Add snapshot tests or style assertion tests to ensure theme colors are applied correctly.
