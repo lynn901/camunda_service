@@ -1,8 +1,9 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, GitBranch, Activity, Clock, Server, Zap, Settings, BarChart3 } from 'lucide-react';
 
 export const Sidebar: React.FC = () => {
+  const navigate = useNavigate();
   const navItems = [
     { name: '整体概览', path: '/', icon: LayoutDashboard },
     { name: '模型仓库', path: '/models', icon: GitBranch },
@@ -41,7 +42,10 @@ export const Sidebar: React.FC = () => {
       </nav>
       
       <div className="mt-auto space-y-1 pt-6 border-t border-outline-variant/20">
-        <button className="w-full mb-6 py-3 bg-primary text-on-primary font-medium shadow-sm hover:scale-[1.02] transition-transform duration-200 font-body text-xs rounded-sm">
+        <button 
+          onClick={() => navigate('/models')}
+          className="w-full mb-6 py-3 bg-primary text-on-primary font-medium shadow-sm hover:scale-[1.02] transition-transform duration-200 font-body text-xs rounded-sm"
+        >
           部署模型
         </button>
         <a className="flex items-center px-3 py-2 text-on-surface-variant font-body tracking-tight hover:bg-surface/50 rounded-sm" href="#">
