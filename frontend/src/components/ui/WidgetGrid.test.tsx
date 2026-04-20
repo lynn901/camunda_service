@@ -16,12 +16,22 @@ describe('WidgetGrid Component (Refactor)', () => {
     
     expect(container.firstChild).toHaveClass('lg:grid-cols-5');
   });
+
+  it('should have generous gap by default', () => {
+    const { container } = render(
+      <WidgetGrid>
+        <div>1</div>
+        <div>2</div>
+      </WidgetGrid>
+    );
+    expect(container.firstChild).toHaveClass(/gap-(6|8|12)/);
+  });
 });
 
 describe('WidgetCard Component (Refactor)', () => {
-  it('should have the new design classes', () => {
+  it('should have the new design classes and support custom padding', () => {
     const { container } = render(
-      <WidgetCard title="Test Title">
+      <WidgetCard title="Test Title" className="p-8">
         <div>Content</div>
       </WidgetCard>
     );
@@ -31,5 +41,6 @@ describe('WidgetCard Component (Refactor)', () => {
     expect(card).toHaveClass('bg-surface-container-lowest');
     expect(card).toHaveClass('ring-1');
     expect(card).toHaveClass('ring-outline-variant/10');
+    expect(card).toHaveClass('p-8');
   });
 });
