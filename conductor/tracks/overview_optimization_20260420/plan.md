@@ -35,7 +35,7 @@ To refactor the "Overall Overview" dashboard to match the Claude-inspired design
     - [ ] **TDD:** Verify the layout structure and card styles in `Card.test.tsx` or `Dashboard.test.tsx`.
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Visual Style Overhaul' (Protocol in workflow.md) [8795720]
 
-## Phase 3: Model Matrix Enhancements
+## Phase 3: Model Matrix Enhancements [checkpoint: e3b6a32]
 *Focus: Adding instance metrics and expanding the matrix layout.*
 
 - [x] Task: Service Update for Metrics [7a5d2b4]
@@ -48,7 +48,7 @@ To refactor the "Overall Overview" dashboard to match the Claude-inspired design
 - [x] Task: Expand Matrix Layout [3242f76]
     - [ ] Adjust `WidgetGrid.tsx` and card styles to use larger cards and more padding, utilizing the freed space.
     - [ ] **TDD:** Verify grid responsiveness and spacing in `WidgetGrid.test.tsx`.
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Model Matrix Enhancements' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Model Matrix Enhancements' (Protocol in workflow.md) [e3b6a32]
 
 ## Phase 4: Final Polish & Verification
 *Focus: Ensuring visual consistency and "editorial pacing".*
