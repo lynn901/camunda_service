@@ -22,7 +22,7 @@ To refactor the "Overall Overview" dashboard to match the Claude-inspired design
     - [ ] **TDD:** Write tests in `Dashboard.test.tsx` to verify these elements are no longer present.
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Preparation & UI Cleanup' (Protocol in workflow.md) [ea4223c]
 
-## Phase 2: Visual Style Overhaul
+## Phase 2: Visual Style Overhaul [checkpoint: 8795720]
 *Focus: Implementing the Claude-inspired design system (Parchment theme).*
 
 - [x] Task: Global Palette and Typography Implementation [d557e02]
@@ -33,7 +33,7 @@ To refactor the "Overall Overview" dashboard to match the Claude-inspired design
     - [ ] Update `Card.tsx` to use the ring-based shadow (`0px 0px 0px 1px #f0eee6`).
     - [ ] Refactor `Dashboard.tsx` to use generous section spacing (80-120px) and a centered layout.
     - [ ] **TDD:** Verify the layout structure and card styles in `Card.test.tsx` or `Dashboard.test.tsx`.
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Visual Style Overhaul' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Visual Style Overhaul' (Protocol in workflow.md) [8795720]
 
 ## Phase 3: Model Matrix Enhancements
 *Focus: Adding instance metrics and expanding the matrix layout.*
