@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Layout } from './components/Layout'
 import { Dashboard } from './components/Dashboard'
 import { WorkerMonitoring } from './components/WorkerMonitoring'
+import { InstanceCenter } from './components/InstanceCenter'
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard')
@@ -24,18 +25,7 @@ function App() {
       case 'workers':
         return <WorkerMonitoring />
       case 'instances':
-        return (
-          <div className="p-8 bg-white rounded-xl border border-slate-200 text-center">
-            <h2 className="text-xl font-bold mb-2">干预中心</h2>
-            <p className="text-slate-500">正在开发中... {selectedModelKey && `正在查看模型: ${selectedModelKey}`}</p>
-            <button 
-              onClick={() => setActiveTab('dashboard')}
-              className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg"
-            >
-              返回概览
-            </button>
-          </div>
-        )
+        return <InstanceCenter initialModelKey={selectedModelKey} />
       default:
         return (
           <div className="p-8 bg-white rounded-xl border border-slate-200 text-center">

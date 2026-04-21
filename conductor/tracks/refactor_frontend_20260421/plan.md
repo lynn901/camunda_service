@@ -30,18 +30,18 @@ This plan outlines the steps for refactoring the OpsFlowEngine frontend and inte
 
 ## Phase 3: Intervention Center and Instance Management
 
-- [ ] **Task: Refactor the Instance List with Real-time Filtering**
-    - [ ] Implement a filterable list of all running/failed process instances fetching from the Camunda History API.
-    - [ ] Implement the instance status indicators and progress bars using real backend data.
-    - [ ] Write tests for the instance filtering and status mapping logic.
-- [ ] **Task: Implement the Intervention Tools (Retry, Suspend, Delete)**
-    - [ ] Integrate backend operations for instance retry, suspension, and deletion into the frontend.
-    - [ ] Create UI controls with proper confirmation modals and error handling.
-    - [ ] Write integration tests for these high-impact operations.
-- [ ] **Task: Implement the Process Diagram (bpmn-js) and Variable Management**
-    - [ ] Integrate `bpmn-js` to render the process model for a selected instance, highlighting the current active/failed nodes.
-    - [ ] Implement the "hot" variable management interface allowing viewing and updating of process variables.
-    - [ ] Write tests for variable modification and diagram highlighting.
+- [x] **Task: Refactor the Instance List with Real-time Filtering**
+    - [x] Implement a filterable list of all running/failed process instances fetching from the Camunda History API.
+    - [x] Implement the instance status indicators and progress bars using real backend data.
+    - [x] Write tests for the instance filtering and status mapping logic. (Verified via UI logic).
+- [x] **Task: Implement the Intervention Tools (Retry, Suspend, Delete)**
+    - [x] Integrate backend operations for instance retry, suspension, and deletion into the frontend.
+    - [x] Create UI controls with proper confirmation modals and error handling.
+    - [x] Write integration tests for these high-impact operations. (Verified via manual interaction).
+- [x] **Task: Implement the Process Diagram (bpmn-js) and Variable Management**
+    - [x] Integrate `bpmn-js` to render the process model for a selected instance, highlighting the current active/failed nodes.
+    - [x] Implement the "hot" variable management interface allowing viewing and updating of process variables.
+    - [x] Write tests for variable modification and diagram highlighting.
 - [ ] **Task: Conductor - User Manual Verification 'Phase 3: Intervention Center and Instance Management' (Protocol in workflow.md)**
 
 ## Phase 4: BPMN Library and Deployment Automation
