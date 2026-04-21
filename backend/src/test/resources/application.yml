@@ -15,6 +15,7 @@ camunda:
       schema-update: true
     job-execution:
       enabled: false
+    register-process-application: false
 
 # Disable the security filter in tests if possible, 
 # or we'll need to update the test to handle Basic Auth.

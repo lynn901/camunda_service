@@ -331,9 +331,6 @@ public class WorkflowController {
     }
 
     /**
-     * 获取外部工作节点。
-     */
-    /**
      * 获取用户操作日志（审计日志）。
      */
     @GetMapping("/history/audit-logs")

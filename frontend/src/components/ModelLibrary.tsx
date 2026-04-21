@@ -17,7 +17,14 @@ import {
 import { workflowApi } from '../lib/api';
 import { ProcessDefinition } from '../types';
 
-const Modal = ({ isOpen, onClose, title, children }: any) => {
+interface ModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  title: string;
+  children: React.ReactNode;
+}
+
+const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
   if (!isOpen) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in">
@@ -90,7 +97,7 @@ export const ModelLibrary = () => {
   });
 
   const triggerMutation = useMutation({
-    mutationFn: ({ key, businessKey, variables }: any) => 
+    mutationFn: ({ key, businessKey, variables }: { key: string, businessKey: string, variables: any }) => 
       workflowApi.startProcess(key, businessKey, variables),
     onSuccess: () => {
       setTriggerModel(null);

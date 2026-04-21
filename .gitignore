@@ -1,38 +1,34 @@
-HELP.md
-target/
-!.mvn/wrapper/maven-wrapper.jar
+
 !**/src/main/**/target/
 !**/src/test/**/target/
-
+!.mvn/wrapper/maven-wrapper.jar
+### Environment ###
+### IntelliJ IDEA ###
+### Logs ###
 ### STS ###
+### Stitch ###
+### VS Code ###
+### macOS ###
+*.env.local
+*.iml
+*.ipr
+*.iws
+*.log
+.AppleDouble
+.DS_Store
+.LSOverride
 .apt_generated
 .classpath
+.env
 .factorypath
+.idea
 .project
 .settings
 .springBeans
+.stitch/node_modules/
 .sts4-cache
-
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
-
-### VS Code ###
 .vscode/
-### macOS ###
-.DS_Store
-.AppleDouble
-.LSOverride
-
-### Environment ###
-.env
-*.env.local
-
-### Logs ###
-*.log
+HELP.md
+dist/
 logs/
-
-### Stitch ###
-.stitch/
+target/

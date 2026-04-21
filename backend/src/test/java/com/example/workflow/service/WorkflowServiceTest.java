@@ -69,7 +69,7 @@ class WorkflowServiceTest {
         when(query.list()).thenReturn(Collections.singletonList(instance));
 
         // When
-        List<HistoricProcessInstanceDto> results = workflowService.getHistoricInstancesDto(businessKey);
+        List<HistoricProcessInstanceDto> results = workflowService.getHistoricInstancesDto(businessKey, null);
 
         // Then
         assertThat(results).hasSize(1);

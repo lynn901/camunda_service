@@ -11,7 +11,15 @@ import {
 } from 'lucide-react';
 import { workflowApi } from '../lib/api';
 
-const StatCard = ({ title, value, icon: Icon, colorClass, borderClass }: any) => (
+interface StatCardProps {
+  title: string;
+  value: string | number;
+  icon: any;
+  colorClass?: string;
+  borderClass?: string;
+}
+
+const StatCard = ({ title, value, icon: Icon, colorClass, borderClass }: StatCardProps) => (
   <div className={`bg-white p-5 rounded-xl border border-slate-200 shadow-sm border-l-4 ${borderClass}`}>
     <p className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">{title}</p>
     <div className="flex items-end justify-between">
@@ -21,7 +29,13 @@ const StatCard = ({ title, value, icon: Icon, colorClass, borderClass }: any) =>
   </div>
 );
 
-export const Dashboard = ({ onNavigateToModels, onNavigateToInstances, onNavigateToHistory }: any) => {
+interface DashboardProps {
+  onNavigateToModels: () => void;
+  onNavigateToInstances: (modelKey?: string) => void;
+  onNavigateToHistory: () => void;
+}
+
+export const Dashboard = ({ onNavigateToModels, onNavigateToInstances, onNavigateToHistory }: DashboardProps) => {
   const [timeRange, setTimeRange] = useState('24h');
 
   const { data: metrics, isLoading: isMetricsLoading } = useQuery({

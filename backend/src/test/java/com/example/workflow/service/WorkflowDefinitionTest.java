@@ -1,6 +1,8 @@
 package com.example.workflow.service;
 
 import org.camunda.bpm.engine.RepositoryService;
+import org.camunda.bpm.engine.repository.Deployment;
+import org.camunda.bpm.engine.repository.DeploymentQuery;
 import org.camunda.bpm.engine.repository.ProcessDefinition;
 import org.camunda.bpm.engine.repository.ProcessDefinitionQuery;
 import org.junit.jupiter.api.Test;
@@ -10,6 +12,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -53,6 +57,14 @@ class WorkflowDefinitionTest {
         when(query.orderByProcessDefinitionVersion()).thenReturn(query);
         when(query.desc()).thenReturn(query);
         when(query.list()).thenReturn(Arrays.asList(v2, v1)); // Version 2 then Version 1
+
+        DeploymentQuery depQuery = mock(DeploymentQuery.class);
+        Deployment d1 = mock(Deployment.class);
+        when(d1.getId()).thenReturn("dep1");
+        when(d1.getDeploymentTime()).thenReturn(new Date());
+        
+        when(repositoryService.createDeploymentQuery()).thenReturn(depQuery);
+        when(depQuery.list()).thenReturn(Collections.singletonList(d1));
 
         // When
         List<Map<String, Object>> results = workflowService.getDeployedProcessDefinitions();

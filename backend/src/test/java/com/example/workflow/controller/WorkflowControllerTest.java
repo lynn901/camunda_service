@@ -25,10 +25,15 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
+
 @WebMvcTest(controllers = WorkflowController.class, excludeAutoConfiguration = {
     org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
     org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class
 })
+@ActiveProfiles("test")
+@DirtiesContext
 class WorkflowControllerTest {
 
     @Autowired
@@ -207,7 +212,7 @@ class WorkflowControllerTest {
                 .startTime(new Date())
                 .build();
 
-        when(workflowService.getHistoricInstancesDto(anyString()))
+        when(workflowService.getHistoricInstancesDto(anyString(), any()))
                 .thenReturn(Collections.singletonList(dto));
 
         // When & Then
