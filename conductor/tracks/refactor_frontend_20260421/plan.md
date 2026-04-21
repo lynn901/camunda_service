@@ -16,7 +16,7 @@ This plan outlines the steps for refactoring the OpsFlowEngine frontend and inte
     - [x] Configure Axios and React-Query for robust API communication.
 - [x] **Task: Conductor - User Manual Verification 'Phase 1: Foundation and Backend API Verification' (Protocol in workflow.md)**
 
-## Phase 2: Core Dashboard and Metrics Integration
+## Phase 2: Core Dashboard and Metrics Integration [checkpoint: 5cc2d66]
 
 - [x] **Task: Implement Dashboard Metrics Visualization**
     - [x] Create a metrics service to fetch real-time instance counts (active, completed, failed).
@@ -26,7 +26,7 @@ This plan outlines the steps for refactoring the OpsFlowEngine frontend and inte
     - [x] Create an API service to fetch the health status and current task load of external workers.
     - [x] Implement the Worker Monitoring list and health status indicators.
     - [x] Write unit and integration tests for worker monitoring features.
-- [ ] **Task: Conductor - User Manual Verification 'Phase 2: Core Dashboard and Metrics Integration' (Protocol in workflow.md)**
+- [x] **Task: Conductor - User Manual Verification 'Phase 2: Core Dashboard and Metrics Integration' (Protocol in workflow.md)**
 
 ## Phase 3: Intervention Center and Instance Management
 
