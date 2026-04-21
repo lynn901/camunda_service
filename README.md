@@ -186,6 +186,79 @@ If an external task cannot be completed (e.g., a downstream system is permanentl
 - **Execution:** The engine cancels the current active activity and starts the process at the next node (or any other node in the BPMN).
 - **API Example:** `POST /api/workflow/instance/{id}/modification?cancelActivityId=Task_External&startBeforeActivityId=Task_Next`.
 
+## 🚀 Business Microservice Integration Guide
+
+Integrating your microservice with OpsFlowEngine follows the **External Task Pattern**. This ensures your business logic is decoupled from the workflow orchestration.
+
+### 1. Project Initialization
+Choose the official Camunda SDK based on your tech stack:
+- **Java:** `camunda-external-task-client-spring-boot` (Recommended)
+- **Node.js:** `camunda-external-task-client-js`
+- **Python:** `camunda-external-task-client-python3`
+
+### 2. Dependency Management (Maven Example)
+Add the client to your `pom.xml`:
+```xml
+<dependency>
+    <groupId>org.camunda.bpm</groupId>
+    <artifactId>camunda-external-task-client-spring-boot</artifactId>
+    <version>7.20.0</version>
+</dependency>
+```
+
+### 3. Configuration (`application.yml`)
+Point your microservice to the OpsFlowEngine endpoint and configure **Basic Auth** (required by default security filters):
+```yaml
+camunda.bpm.client:
+  base-url: http://<ops-flow-host>:8080/engine-rest
+  worker-id: order-service-v1
+  basic-auth:
+    username: ${CAMUNDA_ADMIN_USER:admin}
+    password: ${CAMUNDA_ADMIN_PASSWORD:admin}
+  subscriptions:
+    process-order:
+      lock-duration: 30000
+```
+
+### 4. Implementing the Worker Lifecycle
+A standard worker should handle three scenarios: Success, Technical Failure, and Business Error.
+
+```java
+@Component
+@ExternalTaskSubscription("process-order")
+public class OrderWorker implements ExternalTaskHandler {
+    @Override
+    public void execute(ExternalTask task, ExternalTaskService service) {
+        try {
+            // 1. Business Logic
+            processOrder(task.getVariable("orderId"));
+            
+            // 2. Success path
+            service.complete(task, Map.of("status", "completed"));
+            
+        } catch (InsufficientFundsException e) {
+            // 3. Business Error path (Triggers BPMN Error Boundary)
+            service.handleBpmnError(task, "ERR_FUNDS", e.getMessage());
+            
+        } catch (Exception e) {
+            // 4. Technical Failure path (Triggers Retry)
+            service.handleFailure(task, "Connection Timeout", e.getMessage(), 3, 5000L);
+        }
+    }
+}
+```
+
+### 5. BPMN Design Checklist
+When creating your process in Camunda Modeler:
+- [ ] **Type:** Service Task
+- [ ] **Implementation:** External
+- [ ] **Topic:** `process-order` (Must match code)
+- [ ] **Async Before/After:** Recommended for complex flows to ensure state persistence.
+
+### 6. Local Debugging
+- Use the **Worker Monitoring** tab in OpsFlow UI to see if your worker is "Online".
+- Check the **Incident Center** if your task is stuck due to `retries=0`.
+
 ## 📂 Project Structure
 
 ```text

@@ -31,7 +31,7 @@ OpsFlowEngine 专为运维工程师、开发人员和业务分析师设计，旨
 
 ## 🏗 架构设计
 
-OpsFlowEngine 采用 **中心化工作流枢纽 (Centralized Workflow Hub)** 架构，基于 Camunda 7.20 构建名。
+OpsFlowEngine 采用 **中心化工作流枢纽 (Centralized Workflow Hub)** 架构，基于 Camunda 7.20 构建。
 
 ```mermaid
 graph TD
@@ -75,7 +75,7 @@ graph TD
 - **外部任务执行器 (业务微服务):** 分布式的业务服务通过订阅特定的“主题 (Topic)”来异步领取并执行业务逻辑。这种解耦模式确保了系统的高可用性和弹性伸缩。
 
 ### 外部任务 (External Task) 模式
-1.  **引擎端:** 当流程到达标记为 `External` 的服务节点时，创建一个外部任务实例名。
+1.  **引擎端:** 当流程到达标记为 `External` 的服务节点时，创建一个外部任务实例。
 2.  **Worker 端:** 业务微服务通过 REST API 定时轮询（长轮询）引擎获取任务。
 3.  **Worker 端:** 锁定并执行业务逻辑。
 4.  **Worker 端:** 向引擎上报成功或失败结果。
@@ -186,6 +186,79 @@ OpsFlowEngine 内置了对外部任务故障的处理工具，无需修改业务
 - **执行过程:** 引擎会取消当前处于故障状态的节点，并直接在目标节点（如流程的下一步）启动执行，从而绕过死循环。
 - **接口示例:** `POST /api/workflow/instance/{id}/modification?cancelActivityId=Task_External&startBeforeActivityId=Task_Next`。
 
+## 🚀 业务微服务对接指南
+
+将您的微服务接入 OpsFlowEngine 遵循 **外部任务模式 (External Task Pattern)**。这确保了业务逻辑与工作流编排的深度解耦。
+
+### 1. 工程初始化
+根据您的技术栈选择官方 SDK：
+- **Java:** `camunda-external-task-client-spring-boot` (推荐)
+- **Node.js:** `camunda-external-task-client-js`
+- **Python:** `camunda-external-task-client-python3`
+
+### 2. 依赖管理 (以 Maven 为例)
+在业务服务的 `pom.xml` 中添加客户端 SDK：
+```xml
+<dependency>
+    <groupId>org.camunda.bpm</groupId>
+    <artifactId>camunda-external-task-client-spring-boot</artifactId>
+    <version>7.20.0</version>
+</dependency>
+```
+
+### 3. 应用配置 (`application.yml`)
+配置微服务连接至 OpsFlowEngine 端点，并开启 **Basic Auth** 认证（本工程安全过滤器默认要求）：
+```yaml
+camunda.bpm.client:
+  base-url: http://<ops-flow-host>:8080/engine-rest
+  worker-id: order-service-v1
+  basic-auth:
+    username: ${CAMUNDA_ADMIN_USER:admin}
+    password: ${CAMUNDA_ADMIN_PASSWORD:admin}
+  subscriptions:
+    process-order:
+      lock-duration: 30000
+```
+
+### 4. 实现 Worker 生命周期
+一个标准的 Worker 应处理三种场景：成功、技术故障、业务错误。
+
+```java
+@Component
+@ExternalTaskSubscription("process-order")
+public class OrderWorker implements ExternalTaskHandler {
+    @Override
+    public void execute(ExternalTask task, ExternalTaskService service) {
+        try {
+            // 1. 执行业务逻辑
+            processOrder(task.getVariable("orderId"));
+            
+            // 2. 成功路径：完成任务并提交变量
+            service.complete(task, Map.of("status", "completed"));
+            
+        } catch (InsufficientFundsException e) {
+            // 3. 业务错误路径：触发 BPMN 错误边界事件
+            service.handleBpmnError(task, "ERR_FUNDS", e.getMessage());
+            
+        } catch (Exception e) {
+            // 4. 技术故障路径：触发引擎重试机制
+            service.handleFailure(task, "连接超时", e.getMessage(), 3, 5000L);
+        }
+    }
+}
+```
+
+### 5. BPMN 设计自检清单
+在 Camunda Modeler 中创建流程时：
+- [ ] **节点类型:** Service Task
+- [ ] **实现方式:** External
+- [ ] **Topic:** `process-order` (必须与代码一致)
+- [ ] **异步标记:** 建议开启 Async Before/After 以确保状态持久化。
+
+### 6. 本地调试技巧
+- 访问 OpsFlow UI 的 **Worker Monitoring** 标签页，查看您的 Worker 是否显示为 "Online"。
+- 如果任务因重试耗尽而卡住，请检查 **Incident Center**。
+
 ## 📂 项目结构
 
 ```text
@@ -194,7 +267,7 @@ OpsFlowEngine 内置了对外部任务故障的处理工具，无需修改业务
 ├── frontend/           # React + TypeScript 管理面板
 ├── conductor/          # 项目设计文档与指南
 ├── docker-compose.yml  # 容器编排配置
-└── .env.example        # 环境变量模板
+└── .env.example        # Environment variable template
 ```
 
 ## 🏁 快速入门
