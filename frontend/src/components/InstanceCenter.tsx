@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   Filter, 
@@ -8,17 +8,12 @@ import {
   PauseCircle, 
   StopCircle, 
   CheckCircle,
-  XCircle,
-  AlertCircle,
   RefreshCw,
   FastForward,
-  Settings,
-  ChevronRight,
-  Search
+  Settings
 } from 'lucide-react';
 import { workflowApi } from '../lib/api';
-import { BpmnViewer } from './BpmnViewer';
-import { ProcessInstance, Incident } from '../types';
+import { ProcessInstance } from '../types';
 
 export const InstanceCenter = ({ initialModelKey }: { initialModelKey?: string | null }) => {
   const queryClient = useQueryClient();

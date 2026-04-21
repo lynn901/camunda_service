@@ -46,24 +46,25 @@ This plan outlines the steps for refactoring the OpsFlowEngine frontend and inte
 
 ## Phase 4: BPMN Library and Deployment Automation
 
-- [ ] **Task: Implement the BPMN Model Library and Versioning**
-    - [ ] Create a list view for all deployed process definitions with version history and deployment timestamps.
-    - [ ] Implement the "Manual Trigger" interface with dynamic JSON payload support for launching instances.
-    - [ ] Write tests for deployment listing and manual instance triggering.
-- [ ] **Task: Implement the BPMN File Deployment Interface**
-    - [ ] Create a web-based upload interface for deploying `.bpmn` and `.xml` files to the engine.
-    - [ ] Implement backend file parsing and error reporting for failed deployments.
-    - [ ] Write integration tests for the full deployment flow.
-- [ ] **Task: Conductor - User Manual Verification 'Phase 4: BPMN Library and Deployment Automation' (Protocol in workflow.md)**
+- [x] **Task: Implement the BPMN Model Library and Versioning**
+  - [x] Create a list view for all deployed process definitions with version history and deployment timestamps.
+  - [x] Implement the "Manual Trigger" interface with dynamic JSON payload support for launching instances.
+  - [x] Write tests for deployment listing and manual instance triggering.
 
-## Phase 5: Execution History and Audit Logs
+- [x] **Task: Implement the BPMN File Deployment Interface**
+    - [x] Create a web-based upload interface for deploying `.bpmn` and `.xml` files to the engine.
+    - [x] Implement backend file parsing and error reporting for failed deployments.
+    - [x] Write integration tests for the full deployment flow.
+- [x] **Task: Conductor - User Manual Verification 'Phase 4: BPMN Library and Deployment Automation' (Protocol in workflow.md)**
 
-- [ ] **Task: Implement the Historical Instance Archive**
-    - [ ] Create a read-only archive view for all completed or terminated process instances.
-    - [ ] Implement the duration analysis and final variable snapshot view for each historical instance.
-    - [ ] Write tests for historical data retrieval and duration calculations.
-- [ ] **Task: Implement the Audit Logs and Operation Tracking**
-    - [ ] Integrate the audit log API to track all human and system interventions.
-    - [ ] Implement the audit log view with filtering by operator and action type.
-    - [ ] Write tests for log retrieval and filtering.
-- [ ] **Task: Conductor - User Manual Verification 'Phase 5: Execution History and Audit Logs' (Protocol in workflow.md)**
+## Phase 5: Execution History and Audit Logs (COMPLETED)
+
+- [x] **Task: Implement the Historical Instance Archive**
+    - [x] Create a read-only archive view for all completed or terminated process instances.
+    - [x] Implement the duration analysis and final variable snapshot view for each historical instance.
+    - [x] Write tests for historical data retrieval and duration calculations.
+- [x] **Task: Implement the Audit Logs and Operation Tracking**
+    - [x] Integrate the audit log API to track all human and system interventions.
+    - [x] Implement the audit log view with filtering by operator and action type.
+    - [x] Write tests for log retrieval and filtering.
+- [x] **Task: Conductor - User Manual Verification 'Phase 5: Execution History and Audit Logs' (Protocol in workflow.md)**

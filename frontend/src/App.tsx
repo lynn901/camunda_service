@@ -3,6 +3,9 @@ import { Layout } from './components/Layout'
 import { Dashboard } from './components/Dashboard'
 import { WorkerMonitoring } from './components/WorkerMonitoring'
 import { InstanceCenter } from './components/InstanceCenter'
+import { ModelLibrary } from './components/ModelLibrary'
+import { HistoryArchive } from './components/HistoryArchive'
+import { AuditLogView } from './components/AuditLogView'
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard')
@@ -20,12 +23,19 @@ function App() {
           <Dashboard 
             onNavigateToModels={() => setActiveTab('models')}
             onNavigateToInstances={handleNavigateToInstances}
+            onNavigateToHistory={() => setActiveTab('history')}
           />
         )
       case 'workers':
         return <WorkerMonitoring />
       case 'instances':
         return <InstanceCenter initialModelKey={selectedModelKey} />
+      case 'models':
+        return <ModelLibrary />
+      case 'history':
+        return <HistoryArchive />
+      case 'audits':
+        return <AuditLogView />
       default:
         return (
           <div className="p-8 bg-white rounded-xl border border-slate-200 text-center">

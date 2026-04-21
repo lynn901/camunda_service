@@ -5,6 +5,7 @@ import com.example.workflow.dto.HistoricActivityInstanceDto;
 import com.example.workflow.dto.HistoricProcessInstanceDto;
 import com.example.workflow.dto.MetricsDto;
 import io.micrometer.core.instrument.MeterRegistry;
+import org.camunda.bpm.engine.ExternalTaskService;
 import org.camunda.bpm.engine.HistoryService;
 import org.camunda.bpm.engine.ManagementService;
 import org.camunda.bpm.engine.RepositoryService;
@@ -49,6 +50,7 @@ public class WorkflowService {
     private final HistoryService historyService;
     private final RepositoryService repositoryService;
     private final ManagementService managementService;
+    private final ExternalTaskService externalTaskService;
     private final MeterRegistry meterRegistry;
 
     public WorkflowService(RuntimeService runtimeService, 
@@ -56,12 +58,14 @@ public class WorkflowService {
                           HistoryService historyService, 
                           RepositoryService repositoryService,
                           ManagementService managementService,
+                          ExternalTaskService externalTaskService,
                           MeterRegistry meterRegistry) {
         this.runtimeService = runtimeService;
         this.taskService = taskService;
         this.historyService = historyService;
         this.repositoryService = repositoryService;
         this.managementService = managementService;
+        this.externalTaskService = externalTaskService;
         this.meterRegistry = meterRegistry;
     }
 
@@ -302,12 +306,20 @@ public class WorkflowService {
      * 查询历史流程实例（DTO 版本）。
      *
      * @param businessKey 业务主键
+     * @param finished    是否仅查询已完成的实例
      * @return 历史实例 DTO 列表
      */
-    public List<HistoricProcessInstanceDto> getHistoricInstancesDto(String businessKey) {
+    public List<HistoricProcessInstanceDto> getHistoricInstancesDto(String businessKey, Boolean finished) {
         HistoricProcessInstanceQuery query = historyService.createHistoricProcessInstanceQuery();
         if (businessKey != null && !businessKey.isEmpty()) {
             query.processInstanceBusinessKey(businessKey);
+        }
+        if (finished != null) {
+            if (finished) {
+                query.finished();
+            } else {
+                query.unfinished();
+            }
         }
         List<HistoricProcessInstance> list = query.orderByProcessInstanceEndTime().desc().list();
         return list.stream()
@@ -321,6 +333,24 @@ public class WorkflowService {
                         .durationInMillis(h.getDurationInMillis())
                         .build())
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * 获取流程实例的历史变量（快照）。
+     *
+     * @param processInstanceId 实例 ID
+     * @return 变量 Map
+     */
+    public Map<String, Object> getHistoricVariables(String processInstanceId) {
+        return historyService.createHistoricVariableInstanceQuery()
+                .processInstanceId(processInstanceId)
+                .list()
+                .stream()
+                .collect(Collectors.toMap(
+                        org.camunda.bpm.engine.history.HistoricVariableInstance::getName,
+                        org.camunda.bpm.engine.history.HistoricVariableInstance::getValue,
+                        (v1, v2) -> v2 // 保留最新的
+                ));
     }
 
     /**
@@ -351,15 +381,22 @@ public class WorkflowService {
     // ─────────────────────────────────────────────────────────────
 
     /**
-     * 获取当前部署的所有流程定义（最新版本）。
+     * 获取当前部署的所有流程定义（所有版本，按 Key 排序，再按版本降序）。
      *
      * @return 流程定义列表
      */
     public List<Map<String, Object>> getDeployedProcessDefinitions() {
         List<ProcessDefinition> defs = repositoryService.createProcessDefinitionQuery()
-                .latestVersion()
                 .orderByProcessDefinitionKey().asc()
+                .orderByProcessDefinitionVersion().desc()
                 .list();
+
+        // 批量获取部署信息以优化性能
+        Map<String, Date> deploymentTimes = repositoryService.createDeploymentQuery()
+                .list()
+                .stream()
+                .collect(Collectors.toMap(Deployment::getId, Deployment::getDeploymentTime, (a, b) -> a));
+
         return defs.stream()
                 .map(d -> {
                     Map<String, Object> dto = new HashMap<>();
@@ -368,7 +405,9 @@ public class WorkflowService {
                     dto.put("name", d.getName());
                     dto.put("version", d.getVersion());
                     dto.put("deploymentId", d.getDeploymentId());
+                    dto.put("deploymentTime", deploymentTimes.get(d.getDeploymentId()));
                     dto.put("resourceName", d.getResourceName());
+                    dto.put("suspended", d.isSuspended());
                     return dto;
                 })
                 .collect(Collectors.toList());
@@ -479,7 +518,7 @@ public class WorkflowService {
      * 获取外部工作节点列表 (基于当前锁定的任务聚合)。
      */
     public List<ExternalWorkerDto> getExternalWorkers() {
-        List<ExternalTask> tasks = runtimeService.createExternalTaskQuery().locked().list();
+        List<ExternalTask> tasks = externalTaskService.createExternalTaskQuery().locked().list();
         Map<String, ExternalWorkerDto> workerMap = new HashMap<>();
 
         for (ExternalTask task : tasks) {
@@ -502,5 +541,31 @@ public class WorkflowService {
         }
 
         return new ArrayList<>(workerMap.values());
+    }
+
+    /**
+     * 获取用户操作日志（审计日志）。
+     */
+    public List<Map<String, Object>> getUserOperationLogs(String processInstanceId) {
+        org.camunda.bpm.engine.history.UserOperationLogQuery query = historyService.createUserOperationLogQuery();
+        if (processInstanceId != null && !processInstanceId.isEmpty()) {
+            query.processInstanceId(processInstanceId);
+        }
+        return query.orderByTimestamp().desc().list().stream()
+                .map(log -> {
+                    Map<String, Object> dto = new HashMap<>();
+                    dto.put("id", log.getId());
+                    dto.put("operationId", log.getOperationId());
+                    dto.put("operationType", log.getOperationType());
+                    dto.put("userId", log.getUserId());
+                    dto.put("timestamp", log.getTimestamp());
+                    dto.put("property", log.getProperty());
+                    dto.put("orgValue", log.getOrgValue());
+                    dto.put("newValue", log.getNewValue());
+                    dto.put("entityType", log.getEntityType());
+                    dto.put("processInstanceId", log.getProcessInstanceId());
+                    return dto;
+                })
+                .collect(Collectors.toList());
     }
 }

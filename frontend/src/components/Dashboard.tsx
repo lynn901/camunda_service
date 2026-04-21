@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { 
   Activity, 
@@ -6,8 +6,8 @@ import {
   ShieldAlert, 
   CalendarClock, 
   PlayCircle,
-  History,
   Terminal,
+  History,
 } from 'lucide-react';
 import { workflowApi } from '../lib/api';
 
@@ -21,7 +21,7 @@ const StatCard = ({ title, value, icon: Icon, colorClass, borderClass }: any) =>
   </div>
 );
 
-export const Dashboard = ({ onNavigateToModels, onNavigateToInstances }: any) => {
+export const Dashboard = ({ onNavigateToModels, onNavigateToInstances, onNavigateToHistory }: any) => {
   const [timeRange, setTimeRange] = useState('24h');
 
   const { data: metrics, isLoading: isMetricsLoading } = useQuery({
@@ -74,12 +74,14 @@ export const Dashboard = ({ onNavigateToModels, onNavigateToInstances }: any) =>
           icon={Activity} 
           borderClass="border-l-indigo-500" 
         />
-        <StatCard 
-          title="完成实例总数" 
-          value={metrics?.processStats.completedInstances || 0} 
-          icon={CheckCircle} 
-          borderClass="border-l-emerald-500" 
-        />
+        <div className="cursor-pointer group" onClick={onNavigateToHistory}>
+          <StatCard 
+            title="完成实例总数" 
+            value={metrics?.processStats.completedInstances || 0} 
+            icon={CheckCircle} 
+            borderClass="border-l-emerald-500 group-hover:bg-emerald-50 transition-colors" 
+          />
+        </div>
         <StatCard 
           title="故障/节点失败" 
           value={metrics?.taskMetrics.taskBacklogs || 0} 

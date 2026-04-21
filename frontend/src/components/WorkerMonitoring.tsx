@@ -1,14 +1,12 @@
-import React from 'react';
+
 import { useQuery } from '@tanstack/react-query';
 import { 
   Radio, 
   Wifi, 
-  WifiOff, 
   Lock, 
   Server, 
   RefreshCw,
   Search,
-  Code,
   Power,
   Unlock
 } from 'lucide-react';

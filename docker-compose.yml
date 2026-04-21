@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  camunda-db:
+    image: postgres:15-alpine
+    container_name: camunda-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-camunda_db}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-yourpassword}
+    ports:
+      - "5432:5432"
+    volumes:
+      - camunda-db-data:/var/lib/postgresql/data
+    networks:
+      - camunda-network
+
+  camunda-service:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: camunda-service
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://camunda-db:5432/${POSTGRES_DB:-camunda_db}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-yourpassword}
+      CAMUNDA_ADMIN_USER: ${CAMUNDA_ADMIN_USER:-admin}
+      CAMUNDA_ADMIN_PASSWORD: ${CAMUNDA_ADMIN_PASSWORD:-admin}
+    depends_on:
+      - camunda-db
+    networks:
+      - camunda-network
+
+  ops-flow-ui:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: ops-flow-ui
+    ports:
+      - "80:80"
+    depends_on:
+      - camunda-service
+    networks:
+      - camunda-network
+
+networks:
+  camunda-network:
+    driver: bridge
+
+volumes:
+  camunda-db-data:

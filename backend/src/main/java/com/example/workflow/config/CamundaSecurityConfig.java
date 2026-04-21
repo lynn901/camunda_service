@@ -7,6 +7,8 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.Collections;
 
+import org.springframework.context.annotation.Profile;
+
 /**
  * 引擎安全配置类 — 开启 REST API 的 Basic Auth 认证。
  *
@@ -16,6 +18,7 @@ import java.util.Collections;
  * 验证逻辑直接连接 Camunda 的 {@code IdentityService}（即数据库 ACT_ID_USER 表）。
  */
 @Configuration
+@Profile("!test")
 public class CamundaSecurityConfig {
 
     @Bean

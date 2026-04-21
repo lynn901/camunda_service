@@ -25,6 +25,7 @@ export const workflowApi = {
   },
   suspendDefinition: (key: string) => api.put(`/definitions/${key}/suspend`),
   activateDefinition: (key: string) => api.put(`/definitions/${key}/activate`),
+  deleteDeployment: (id: string, cascade = false) => api.delete(`/deployments/${id}`, { params: { cascade } }),
 
   // Instances
   startProcess: (key: string, businessKey: string, variables?: any) => 
@@ -35,10 +36,14 @@ export const workflowApi = {
   setVariables: (instanceId: string, variables: any) => api.put(`/instance/${instanceId}/variables`, variables),
   
   // History
-  getHistoryInstances: (businessKey?: string) => 
-    api.get<ProcessInstance[]>('/history/instances', { params: { businessKey } }).then(res => res.data),
+  getHistoryInstances: (businessKey?: string, finished?: boolean) => 
+    api.get<ProcessInstance[]>('/history/instances', { params: { businessKey, finished } }).then(res => res.data),
   getHistoryActivities: (instanceId: string) => 
     api.get<HistoricActivityInstance[]>(`/history/instances/${instanceId}/activities`).then(res => res.data),
+  getHistoricVariables: (instanceId: string) => 
+    api.get<Record<string, any>>(`/history/instances/${instanceId}/variables`).then(res => res.data),
+  getAuditLogs: (instanceId?: string) => 
+    api.get<any[]>('/history/audit-logs', { params: { processInstanceId: instanceId } }).then(res => res.data),
 
   // Tasks
   getTasks: (instanceId: string) => api.get<Task[]>(`/task/by-instance/${instanceId}`).then(res => res.data),

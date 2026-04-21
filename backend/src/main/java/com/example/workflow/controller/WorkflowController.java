@@ -203,13 +203,23 @@ public class WorkflowController {
      * 查询历史流程实例（DTO 列表）。
      * 
      * @param businessKey 业务主键
+     * @param finished    是否仅查询已完成的实例
      * @return 历史实例 DTO 列表
      */
     @GetMapping("/history/instances")
     public ResponseEntity<List<HistoricProcessInstanceDto>> getHistoryInstances(
-            @RequestParam(required = false) String businessKey) {
-        List<HistoricProcessInstanceDto> history = workflowService.getHistoricInstancesDto(businessKey);
+            @RequestParam(required = false) String businessKey,
+            @RequestParam(required = false) Boolean finished) {
+        List<HistoricProcessInstanceDto> history = workflowService.getHistoricInstancesDto(businessKey, finished);
         return ResponseEntity.ok(history);
+    }
+
+    /**
+     * 获取历史实例的变量快照。
+     */
+    @GetMapping("/history/instances/{instanceId}/variables")
+    public ResponseEntity<Map<String, Object>> getHistoricVariables(@PathVariable String instanceId) {
+        return ResponseEntity.ok(workflowService.getHistoricVariables(instanceId));
     }
 
     /**
@@ -323,8 +333,12 @@ public class WorkflowController {
     /**
      * 获取外部工作节点。
      */
-    @GetMapping("/workers")
-    public ResponseEntity<List<ExternalWorkerDto>> getWorkers() {
-        return ResponseEntity.ok(workflowService.getExternalWorkers());
+    /**
+     * 获取用户操作日志（审计日志）。
+     */
+    @GetMapping("/history/audit-logs")
+    public ResponseEntity<List<Map<String, Object>>> getAuditLogs(
+            @RequestParam(required = false) String processInstanceId) {
+        return ResponseEntity.ok(workflowService.getUserOperationLogs(processInstanceId));
     }
 }

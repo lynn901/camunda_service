@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import BpmnJS from 'bpmn-js/lib/NavigatedViewer';
 
 interface BpmnViewerProps {

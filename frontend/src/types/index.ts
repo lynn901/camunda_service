@@ -4,6 +4,7 @@ export interface ProcessDefinition {
   name: string;
   version: number;
   deploymentId: string;
+  deploymentTime?: string;
   resourceName: string;
   suspended?: boolean;
 }
