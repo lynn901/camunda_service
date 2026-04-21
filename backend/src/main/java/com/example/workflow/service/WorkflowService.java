@@ -1,5 +1,6 @@
 package com.example.workflow.service;
 
+import com.example.workflow.dto.ExternalWorkerDto;
 import com.example.workflow.dto.HistoricActivityInstanceDto;
 import com.example.workflow.dto.HistoricProcessInstanceDto;
 import com.example.workflow.dto.MetricsDto;
@@ -9,6 +10,7 @@ import org.camunda.bpm.engine.ManagementService;
 import org.camunda.bpm.engine.RepositoryService;
 import org.camunda.bpm.engine.RuntimeService;
 import org.camunda.bpm.engine.TaskService;
+import org.camunda.bpm.engine.externaltask.ExternalTask;
 import org.camunda.bpm.engine.history.HistoricActivityInstance;
 import org.camunda.bpm.engine.history.HistoricProcessInstance;
 import org.camunda.bpm.engine.history.HistoricProcessInstanceQuery;
@@ -24,9 +26,7 @@ import org.springframework.stereotype.Service;
 import java.io.InputStream;
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -473,5 +473,34 @@ public class WorkflowService {
                 .execute();
         log.info("[WorkflowService] 实例节点跳转成功 | instanceId={} | cancel={} | jumpTo={}",
                 processInstanceId, cancelActivityId, startBeforeActivityId);
+    }
+
+    /**
+     * 获取外部工作节点列表 (基于当前锁定的任务聚合)。
+     */
+    public List<ExternalWorkerDto> getExternalWorkers() {
+        List<ExternalTask> tasks = runtimeService.createExternalTaskQuery().locked().list();
+        Map<String, ExternalWorkerDto> workerMap = new HashMap<>();
+
+        for (ExternalTask task : tasks) {
+            String workerId = task.getWorkerId();
+            if (workerId == null) continue;
+
+            ExternalWorkerDto dto = workerMap.computeIfAbsent(workerId, id -> ExternalWorkerDto.builder()
+                    .workerId(id)
+                    .activeTasks(0)
+                    .topics(new HashSet<>())
+                    .lastSeen(task.getLockExpirationTime()) // Using lock expiration as a proxy for activity
+                    .status("Online")
+                    .build());
+
+            dto.setActiveTasks(dto.getActiveTasks() + 1);
+            dto.getTopics().add(task.getTopicName());
+            if (dto.getActiveTasks() > 50) {
+                dto.setStatus("HighLoad");
+            }
+        }
+
+        return new ArrayList<>(workerMap.values());
     }
 }

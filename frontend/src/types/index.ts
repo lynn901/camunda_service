@@ -64,3 +64,11 @@ export interface Task {
   taskDefinitionKey: string;
   processInstanceId?: string;
 }
+
+export interface ExternalWorker {
+  workerId: string;
+  activeTasks: number;
+  topics: string[];
+  lastSeen: string;
+  status: 'Online' | 'HighLoad' | 'Offline';
+}

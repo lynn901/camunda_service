@@ -5,7 +5,8 @@ import {
   HistoricActivityInstance, 
   Incident, 
   Metrics, 
-  Task 
+  Task,
+  ExternalWorker
 } from '../types';
 
 const api = axios.create({
@@ -51,4 +52,7 @@ export const workflowApi = {
 
   // Metrics
   getMetrics: () => api.get<Metrics>('/metrics').then(res => res.data),
+
+  // Workers
+  getWorkers: () => api.get<ExternalWorker[]>('/workers').then(res => res.data),
 };

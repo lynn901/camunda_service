@@ -1,5 +1,6 @@
 package com.example.workflow.controller;
 
+import com.example.workflow.dto.ExternalWorkerDto;
 import com.example.workflow.dto.HistoricActivityInstanceDto;
 import com.example.workflow.dto.HistoricProcessInstanceDto;
 import com.example.workflow.dto.MetricsDto;
@@ -317,5 +318,13 @@ public class WorkflowController {
             @RequestParam String startBeforeActivityId) {
         workflowService.modifyProcessInstance(instanceId, cancelActivityId, startBeforeActivityId);
         return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 获取外部工作节点。
+     */
+    @GetMapping("/workers")
+    public ResponseEntity<List<ExternalWorkerDto>> getWorkers() {
+        return ResponseEntity.ok(workflowService.getExternalWorkers());
     }
 }
