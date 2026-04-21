@@ -199,11 +199,12 @@ Choose the official Camunda SDK based on your tech stack:
 ### 2. Dependency Management (Maven Example)
 Add the client to your `pom.xml`:
 ```xml
-<dependency>
-    <groupId>org.camunda.bpm</groupId>
-    <artifactId>camunda-external-task-client-spring-boot</artifactId>
-    <version>7.20.0</version>
-</dependency>
+        <!-- Camunda External Task Client Spring Boot Starter -->
+        <dependency>
+            <groupId>org.camunda.bpm.springboot</groupId>
+            <artifactId>camunda-bpm-spring-boot-starter-external-task-client</artifactId>
+            <version>${camunda.version}</version>
+        </dependency>
 ```
 
 ### 3. Configuration (`application.yml`)

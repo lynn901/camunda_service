@@ -199,11 +199,12 @@ OpsFlowEngine 内置了对外部任务故障的处理工具，无需修改业务
 ### 2. 依赖管理 (以 Maven 为例)
 在业务服务的 `pom.xml` 中添加客户端 SDK：
 ```xml
-<dependency>
-    <groupId>org.camunda.bpm</groupId>
-    <artifactId>camunda-external-task-client-spring-boot</artifactId>
-    <version>7.20.0</version>
-</dependency>
+        <!-- Camunda External Task Client Spring Boot Starter -->
+        <dependency>
+            <groupId>org.camunda.bpm.springboot</groupId>
+            <artifactId>camunda-bpm-spring-boot-starter-external-task-client</artifactId>
+            <version>${camunda.version}</version>
+        </dependency>
 ```
 
 ### 3. 应用配置 (`application.yml`)
