@@ -28,7 +28,7 @@ This plan outlines the steps for refactoring the OpsFlowEngine frontend and inte
     - [x] Write unit and integration tests for worker monitoring features.
 - [x] **Task: Conductor - User Manual Verification 'Phase 2: Core Dashboard and Metrics Integration' (Protocol in workflow.md)**
 
-## Phase 3: Intervention Center and Instance Management
+## Phase 3: Intervention Center and Instance Management [checkpoint: 443ff1d]
 
 - [x] **Task: Refactor the Instance List with Real-time Filtering**
     - [x] Implement a filterable list of all running/failed process instances fetching from the Camunda History API.
@@ -42,7 +42,7 @@ This plan outlines the steps for refactoring the OpsFlowEngine frontend and inte
     - [x] Integrate `bpmn-js` to render the process model for a selected instance, highlighting the current active/failed nodes.
     - [x] Implement the "hot" variable management interface allowing viewing and updating of process variables.
     - [x] Write tests for variable modification and diagram highlighting.
-- [ ] **Task: Conductor - User Manual Verification 'Phase 3: Intervention Center and Instance Management' (Protocol in workflow.md)**
+- [x] **Task: Conductor - User Manual Verification 'Phase 3: Intervention Center and Instance Management' (Protocol in workflow.md)**
 
 ## Phase 4: BPMN Library and Deployment Automation
 
