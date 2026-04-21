@@ -18,4 +18,4 @@
 ## Build & CI/CD
 - **Backend:** Maven 3.9+.
 - **Frontend:** npm or Yarn (Standard Vite workflow).
-- **Deployment:** Docker (Implied by .dockerignore in backend).
+- **Deployment:** Docker & Docker Compose (Containerized multi-service environment).

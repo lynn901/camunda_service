@@ -19,6 +19,7 @@ OpsFlowEngine is a modern, high-performance monitoring and intervention dashboar
 - **Intervention Center:** Detailed execution path visualization (bpmn-js), error diagnostics, and direct instance operations.
 - **BPMN Library:** Deployment and version management for process definitions.
 - **Execution History:** Read-only archive for post-mortem analysis and duration tracking.
+- **Audit Logs:** Tamper-evident tracking of all human and system interventions (user operation logs).
 - **Scheduled Tasks:** Automation of repetitive processes using Cron expressions.
 - **External Worker Monitoring:** Health tracking and task lock management for distributed microservices.
 
