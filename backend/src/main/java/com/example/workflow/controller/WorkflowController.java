@@ -8,7 +8,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -238,5 +240,82 @@ public class WorkflowController {
     public ResponseEntity<MetricsDto> getMetrics() {
         MetricsDto metrics = workflowService.getOverallMetrics();
         return ResponseEntity.ok(metrics);
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // 部署与定义管理
+    // ─────────────────────────────────────────────────────────────
+
+    /**
+     * 部署 BPMN 文件。
+     */
+    @PostMapping("/deploy")
+    public ResponseEntity<Map<String, String>> deploy(@RequestParam("file") MultipartFile file) throws IOException {
+        String deploymentId = workflowService.deploy(file.getOriginalFilename(), file.getInputStream());
+        Map<String, String> result = new HashMap<>();
+        result.put("deploymentId", deploymentId);
+        result.put("resourceName", file.getOriginalFilename());
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * 挂起流程定义。
+     */
+    @PutMapping("/definitions/{key}/suspend")
+    public ResponseEntity<Void> suspendDefinition(@PathVariable String key) {
+        workflowService.suspendProcessDefinition(key);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 激活流程定义。
+     */
+    @PutMapping("/definitions/{key}/activate")
+    public ResponseEntity<Void> activateDefinition(@PathVariable String key) {
+        workflowService.activateProcessDefinition(key);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 删除部署。
+     */
+    @DeleteMapping("/deployments/{id}")
+    public ResponseEntity<Void> deleteDeployment(@PathVariable String id, @RequestParam(defaultValue = "false") boolean cascade) {
+        workflowService.deleteDeployment(id, cascade);
+        return ResponseEntity.noContent().build();
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // 故障与干预
+    // ─────────────────────────────────────────────────────────────
+
+    /**
+     * 查询实例故障。
+     */
+    @GetMapping("/instance/{instanceId}/incidents")
+    public ResponseEntity<List<Map<String, Object>>> getIncidents(@PathVariable String instanceId) {
+        List<Map<String, Object>> incidents = workflowService.getIncidents(instanceId);
+        return ResponseEntity.ok(incidents);
+    }
+
+    /**
+     * 重置 Job 重试次数。
+     */
+    @PostMapping("/jobs/{jobId}/retries")
+    public ResponseEntity<Void> setJobRetries(@PathVariable String jobId, @RequestParam(defaultValue = "1") int retries) {
+        workflowService.setJobRetries(jobId, retries);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 修改实例节点（跳转）。
+     */
+    @PostMapping("/instance/{instanceId}/modification")
+    public ResponseEntity<Void> modifyInstance(
+            @PathVariable String instanceId,
+            @RequestParam String cancelActivityId,
+            @RequestParam String startBeforeActivityId) {
+        workflowService.modifyProcessInstance(instanceId, cancelActivityId, startBeforeActivityId);
+        return ResponseEntity.ok().build();
     }
 }

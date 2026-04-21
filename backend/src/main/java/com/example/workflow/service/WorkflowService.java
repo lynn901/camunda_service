@@ -12,13 +12,16 @@ import org.camunda.bpm.engine.TaskService;
 import org.camunda.bpm.engine.history.HistoricActivityInstance;
 import org.camunda.bpm.engine.history.HistoricProcessInstance;
 import org.camunda.bpm.engine.history.HistoricProcessInstanceQuery;
+import org.camunda.bpm.engine.repository.Deployment;
 import org.camunda.bpm.engine.repository.ProcessDefinition;
+import org.camunda.bpm.engine.runtime.Incident;
 import org.camunda.bpm.engine.runtime.ProcessInstance;
 import org.camunda.bpm.engine.task.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.io.InputStream;
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
 import java.util.HashMap;
@@ -369,5 +372,106 @@ public class WorkflowService {
                     return dto;
                 })
                 .collect(Collectors.toList());
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // 流程定义与部署
+    // ─────────────────────────────────────────────────────────────
+
+    /**
+     * 部署 BPMN 流程定义。
+     *
+     * @param resourceName 资源名称（如 order-process.bpmn）
+     * @param inputStream  BPMN 文件流
+     * @return 部署 ID
+     */
+    public String deploy(String resourceName, InputStream inputStream) {
+        Deployment deployment = repositoryService.createDeployment()
+                .addInputStream(resourceName, inputStream)
+                .name("Manual Deployment: " + resourceName)
+                .deploy();
+        log.info("[WorkflowService] 流程部署成功 | id={} | name={}", deployment.getId(), resourceName);
+        return deployment.getId();
+    }
+
+    /**
+     * 挂起流程定义（禁止发起新实例）。
+     */
+    public void suspendProcessDefinition(String processDefinitionKey) {
+        repositoryService.suspendProcessDefinitionByKey(processDefinitionKey, true, null);
+        log.info("[WorkflowService] 流程定义已挂起 | key={}", processDefinitionKey);
+    }
+
+    /**
+     * 激活流程定义。
+     */
+    public void activateProcessDefinition(String processDefinitionKey) {
+        repositoryService.activateProcessDefinitionByKey(processDefinitionKey, true, null);
+        log.info("[WorkflowService] 流程定义已激活 | key={}", processDefinitionKey);
+    }
+
+    /**
+     * 删除部署。
+     *
+     * @param deploymentId 部署 ID
+     * @param cascade      是否级联删除（同时删除运行中实例）
+     */
+    public void deleteDeployment(String deploymentId, boolean cascade) {
+        repositoryService.deleteDeployment(deploymentId, cascade);
+        log.info("[WorkflowService] 部署已删除 | id={} | cascade={}", deploymentId, cascade);
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // 故障干预 (Intervention)
+    // ─────────────────────────────────────────────────────────────
+
+    /**
+     * 查询实例的故障列表 (Incidents)。
+     */
+    public List<Map<String, Object>> getIncidents(String processInstanceId) {
+        List<Incident> incidents = runtimeService.createIncidentQuery()
+                .processInstanceId(processInstanceId)
+                .list();
+        return incidents.stream()
+                .map(i -> {
+                    Map<String, Object> dto = new HashMap<>();
+                    dto.put("id", i.getId());
+                    dto.put("incidentType", i.getIncidentType());
+                    dto.put("incidentMessage", i.getIncidentMessage());
+                    dto.put("activityId", i.getActivityId());
+                    dto.put("executionId", i.getExecutionId());
+                    dto.put("jobId", i.getConfiguration()); // Configuration typically holds the jobId for failed jobs
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 重置 Job 重试次数（用于从故障中恢复）。
+     *
+     * @param jobId   Job ID
+     * @param retries 重试次数 (通常设为 1)
+     */
+    public void setJobRetries(String jobId, int retries) {
+        managementService.setJobRetries(jobId, retries);
+        log.info("[WorkflowService] Job 重试次数已重置 | jobId={} | retries={}", jobId, retries);
+    }
+
+    /**
+     * 流程实例修改 (Node Jumping / Modification)。
+     * <p>
+     * 这是一个简化版实现，直接取消当前节点并启动目标节点。
+     *
+     * @param processInstanceId    实例 ID
+     * @param cancelActivityId     要取消的当前节点 ID
+     * @param startBeforeActivityId 要跳转到的目标节点 ID
+     */
+    public void modifyProcessInstance(String processInstanceId, String cancelActivityId, String startBeforeActivityId) {
+        runtimeService.createProcessInstanceModification(processInstanceId)
+                .cancelAllForActivity(cancelActivityId)
+                .startBeforeActivity(startBeforeActivityId)
+                .execute();
+        log.info("[WorkflowService] 实例节点跳转成功 | instanceId={} | cancel={} | jumpTo={}",
+                processInstanceId, cancelActivityId, startBeforeActivityId);
     }
 }

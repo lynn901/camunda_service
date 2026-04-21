@@ -6,14 +6,14 @@ This plan outlines the steps for refactoring the OpsFlowEngine frontend and inte
 
 ## Phase 1: Foundation and Backend API Verification
 
-- [ ] **Task: Verify and Enhance Backend API Endpoints**
-    - [ ] Write unit tests for `WorkflowController` to ensure full coverage of deployment, start instance, and instance management endpoints.
-    - [ ] Implement any missing REST endpoints required by the frontend (e.g., specific metrics or history endpoints).
-    - [ ] Verify endpoints with manual testing against a running Camunda 7 engine.
-- [ ] **Task: Setup Frontend Infrastructure and Type Definitions**
-    - [ ] Initialize the React/TypeScript project with Vite and Tailwind CSS (if not already fully configured).
-    - [ ] Define shared TypeScript interfaces for all backend data structures (ProcessDefinition, ProcessInstance, ActivityInstance, Metrics).
-    - [ ] Configure Axios and React-Query for robust API communication.
+- [x] **Task: Verify and Enhance Backend API Endpoints**
+    - [x] Write unit tests for `WorkflowController` to ensure full coverage of deployment, start instance, and instance management endpoints.
+    - [x] Implement any missing REST endpoints required by the frontend (e.g., specific metrics or history endpoints).
+    - [x] Verify endpoints with manual testing against a running Camunda 7 engine.
+- [x] **Task: Setup Frontend Infrastructure and Type Definitions**
+    - [x] Initialize the React/TypeScript project with Vite and Tailwind CSS (if not already fully configured).
+    - [x] Define shared TypeScript interfaces for all backend data structures (ProcessDefinition, ProcessInstance, ActivityInstance, Metrics).
+    - [x] Configure Axios and React-Query for robust API communication.
 - [ ] **Task: Conductor - User Manual Verification 'Phase 1: Foundation and Backend API Verification' (Protocol in workflow.md)**
 
 ## Phase 2: Core Dashboard and Metrics Integration
