@@ -1,34 +1,110 @@
+# ==========================================
+# Backend Project (Spring Boot / Java / Maven)
+# ==========================================
+backend/target/
+backend/bin/
+backend/out/
+backend/build/
+backend/.mvn/wrapper/maven-wrapper.jar
+backend/dependency-reduced-pom.xml
+backend/*.jar
+backend/*.war
+backend/*.ear
+backend/*.zip
+backend/*.tar.gz
+backend/*.rar
+backend/logs/
 
-!**/src/main/**/target/
-!**/src/test/**/target/
-!.mvn/wrapper/maven-wrapper.jar
-### Environment ###
-### IntelliJ IDEA ###
-### Logs ###
-### STS ###
-### Stitch ###
-### VS Code ###
-### macOS ###
-*.env.local
+# ==========================================
+# Frontend Project (React / Vite / Node.js)
+# ==========================================
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/build/
+frontend/coverage/
+frontend/.vite/
+frontend/.eslintcache
+frontend/.stylelintcache
+frontend/.parcel-cache
+frontend/.next/
+frontend/.nuxt/
+frontend/.cache/
+frontend/jspm_packages/
+frontend/.npm/
+frontend/.yarn-integrity
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/pnpm-debug.log*
+
+# ==========================================
+# Global Build & Dependencies (Fallback)
+# ==========================================
+node_modules/
+jspm_packages/
+target/
+dist/
+build/
+bin/
+out/
+
+# ==========================================
+# IDEs and Editors
+# ==========================================
+.idea/
 *.iml
 *.ipr
 *.iws
-*.log
-.AppleDouble
-.DS_Store
-.LSOverride
-.apt_generated
-.classpath
-.env
-.factorypath
-.idea
-.project
-.settings
-.springBeans
-.stitch/node_modules/
-.sts4-cache
 .vscode/
-HELP.md
-dist/
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/settings.json
+!.vscode/tasks.json
+.project
+.classpath
+.settings/
+.factorypath
+.springBeans
+.sts4-cache
+.apt_generated
+*.sublime-workspace
+*.sublime-project
+
+# ==========================================
+# Environment variables
+# ==========================================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+
+# ==========================================
+# Logs
+# ==========================================
 logs/
-target/
+*.log
+
+# ==========================================
+# OS specific files
+# ==========================================
+.DS_Store
+.DS_Store?
+._*
+.AppleDouble
+.LSOverride
+Icon?
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ==========================================
+# Miscellaneous
+# ==========================================
+.stitch/
+# Maven wrapper jar ignore (global)
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
