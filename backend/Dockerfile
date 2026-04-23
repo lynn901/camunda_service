@@ -2,11 +2,8 @@
 FROM maven:3.9.5-eclipse-temurin-17 AS build-stage
 WORKDIR /app
 
-# 利用 Maven 依赖缓存：仅在 pom.xml 变化时重新下载
-COPY pom.xml .
-RUN mvn dependency:go-offline -B
-
 # 构建源码
+COPY pom.xml .
 COPY src ./src
 RUN mvn clean package -DskipTests -B
 

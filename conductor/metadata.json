@@ -1,8 +1,0 @@
-{
-  "track_id": "fix_worker_list_20260422",
-  "type": "bug",
-  "status": "new",
-  "created_at": "2026-04-22T11:18:22Z",
-  "updated_at": "2026-04-22T11:18:22Z",
-  "description": "解决页面外部工作节点无法正常显示节点注册列表的问题"
-}
