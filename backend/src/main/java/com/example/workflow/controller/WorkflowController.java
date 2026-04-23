@@ -253,6 +253,14 @@ public class WorkflowController {
         return ResponseEntity.ok(metrics);
     }
 
+    /**
+     * 获取所有活跃的外部工作节点（基于锁定的任务聚合）。
+     */
+    @GetMapping("/external-workers")
+    public ResponseEntity<List<ExternalWorkerDto>> getWorkers() {
+        return ResponseEntity.ok(workflowService.getExternalWorkers());
+    }
+
     // ─────────────────────────────────────────────────────────────
     // 部署与定义管理
     // ─────────────────────────────────────────────────────────────

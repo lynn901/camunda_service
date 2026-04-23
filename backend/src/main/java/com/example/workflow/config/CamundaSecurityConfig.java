@@ -32,7 +32,7 @@ public class CamundaSecurityConfig {
         // 【核心配置】：设置拦截路径
         // 1. /engine-rest/*  - 保护 Camunda 原生开放接口
         // 2. /api/workflow/* - 保护本工程自定义的精简版接口
-        registration.addUrlPatterns("/engine-rest/*", "/api/workflow/*");
+        registration.addUrlPatterns("/engine-rest/*", "/api/workflow/**");
 
         // 设置初始化参数：指定认证提供者为 Basic Auth
         registration.addInitParameter("authentication-provider", "org.camunda.bpm.engine.rest.security.auth.impl.HttpBasicAuthenticationProvider");

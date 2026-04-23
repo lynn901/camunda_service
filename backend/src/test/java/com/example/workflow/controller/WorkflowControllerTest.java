@@ -263,4 +263,25 @@ class WorkflowControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.processStats.totalInstances").value(100));
     }
+
+    @Test
+    void shouldGetWorkers() throws Exception {
+        // Given
+        com.example.workflow.dto.ExternalWorkerDto worker = com.example.workflow.dto.ExternalWorkerDto.builder()
+                .workerId("worker-1")
+                .activeTasks(5)
+                .topics(Collections.singleton("process-order"))
+                .status("Online")
+                .build();
+
+        when(workflowService.getExternalWorkers()).thenReturn(Collections.singletonList(worker));
+
+        // When & Then
+        mockMvc.perform(get("/api/workflow/external-workers")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].workerId").value("worker-1"))
+                .andExpect(jsonPath("$[0].activeTasks").value(5))
+                .andExpect(jsonPath("$[0].status").value("Online"));
+    }
 }

@@ -59,5 +59,5 @@ export const workflowApi = {
   getMetrics: () => api.get<Metrics>('/metrics').then(res => res.data),
 
   // Workers
-  getWorkers: () => api.get<ExternalWorker[]>('/workers').then(res => res.data),
+  getWorkers: () => api.get<ExternalWorker[]>('/external-workers').then(res => res.data),
 };
